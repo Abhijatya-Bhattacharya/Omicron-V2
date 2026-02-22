@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,15 +28,17 @@ class AppTheme {
   static const Color surfacePressed = Color(0xFFE2E8F0);
 
   // Text
-  static const Color textPrimary = Color(0xFF1E293B);
-  static const Color textSecondary = Color(0xFF64748B);
-  static const Color textTertiary = Color(0xFF94A3B8);
+  static const Color textPrimary = Color(0xFF0D1117);
+  static const Color textSecondary = Color(0xFF4A5568);
+  static const Color textTertiary = Color(0xFF718096);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
 
-  // Borders & Dividers
-  static const Color border = Color(0xFFE2E8F0);
-  static const Color borderFocus = Color(0xFFCBD5E1);
-  static const Color divider = Color(0xFFF1F5F9);
+  // Borders & Dividers (frosted glass style)
+  static const Color border = Color(0x1A000000);        // 10% black
+  static const Color borderFocus = Color(0x33000000);    // 20% black
+  static const Color divider = Color(0x14000000);        // 8% black
+  static const Color glassBorder = Color(0x22FFFFFF);    // subtle white edge
+  static const Color glassSurface = Color(0xCCFFFFFF);   // 80% white
 
   // Semantic / Status
   static const Color success = Color(0xFF16A34A);
@@ -53,7 +56,7 @@ class AppTheme {
   static const Color sidebarActive = Color(0xFF33333D);
 
   // Misc
-  static const Color iconColor = Color(0xFF94A3B8);
+  static const Color iconColor = Color(0xFF4A5568);
   static const Color shimmerBase = Color(0xFFE2E8F0);
   static const Color shimmerHighlight = Color(0xFFF1F5F9);
 
@@ -169,6 +172,13 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isSearching = false;
   String _searchError = '';
   List<Map<String, String>> _paperSearchResults = [];
+
+  // --- Patent Search ---
+  bool _isPatentSearch = false; // false = Papers, true = Patents
+  List<Map<String, String>> _patentSearchResults = [];
+  bool _searchUSPatents = true;  // US Patent Office (USPTO)
+  bool _searchINPatents = true;  // Indian Patent Office (IPO)
+  String _llmOptimizedQuery = '';  // LLM-optimized search query
 
   // --- Ollama Settings ---
   String _ollamaIp = 'http://localhost:11434';
@@ -350,46 +360,83 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SizedBox(
               width: 56,
               height: 48,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Active indicator bar on left edge
-                  if (isActive)
-                    Positioned(
-                      left: 0,
-                      top: 10,
-                      bottom: 10,
-                      child: Container(
-                        width: 3,
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryLight,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: isActive
-                          ? AppTheme.sidebarActive
-                          : isHovered
-                              ? AppTheme.sidebarHover
-                              : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: isActive
-                          ? AppTheme.primaryLight
-                          : isHovered
-                              ? Colors.white70
-                              : Colors.white54,
-                      size: 24,
-                    ),
+              child: Center(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: isActive
+                        ? LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              AppTheme.primaryDark.withOpacity(0.7),
+                              AppTheme.sidebarActive,
+                            ],
+                          )
+                        : isHovered
+                            ? LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  const Color(0xFF2E2E3C),
+                                  const Color(0xFF1A1A24),
+                                ],
+                              )
+                            : null,
+                    color: (!isActive && !isHovered) ? Colors.transparent : null,
+                    borderRadius: BorderRadius.circular(13),
+                    border: isActive
+                        ? Border.all(
+                            color: AppTheme.primaryLight.withOpacity(0.25),
+                            width: 1,
+                          )
+                        : isHovered
+                            ? Border.all(
+                                color: Colors.white.withOpacity(0.06),
+                                width: 1,
+                              )
+                            : null,
+                    boxShadow: isActive
+                        ? [
+                            BoxShadow(
+                              color: AppTheme.primary.withOpacity(0.45),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                              spreadRadius: -2,
+                            ),
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.5),
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            ),
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.05),
+                              blurRadius: 1,
+                              offset: const Offset(0, -1),
+                            ),
+                          ]
+                        : isHovered
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.4),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ]
+                            : null,
                   ),
-                ],
+                  child: Icon(
+                    icon,
+                    color: isActive
+                        ? AppTheme.primaryLight
+                        : isHovered
+                            ? Colors.white70
+                            : Colors.white38,
+                    size: 22,
+                  ),
+                ),
               ),
             ),
           ),
@@ -506,17 +553,28 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 32),
 
                 // Input Card
-                Container(
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                    child: Container(
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.glassSurface,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.white),
+                    border: Border.all(color: AppTheme.border),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.textPrimary.withOpacity(0.04),
-                        blurRadius: 24,
-                        offset: const Offset(0, 12),
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 40,
+                        offset: const Offset(0, 16),
+                        spreadRadius: -4,
+                      ),
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.6),
+                        blurRadius: 1,
+                        offset: const Offset(0, -1),
+                        spreadRadius: 0,
                       ),
                     ],
                   ),
@@ -580,6 +638,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
+                ),
+                ),
                 ),
 
                 const SizedBox(height: 40),
@@ -690,7 +750,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Find related academic papers',
+                          _isPatentSearch
+                              ? 'Find related patents'
+                              : 'Find related academic papers',
                           style: GoogleFonts.interTight(
                             fontSize: 14,
                             color: AppTheme.textSecondary,
@@ -698,22 +760,71 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
+                    // Toggle switch: Papers / Patents
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.background,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppTheme.border),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildToggleOption(
+                            icon: Icons.article_outlined,
+                            label: 'Papers',
+                            isSelected: !_isPatentSearch,
+                            onTap: () {
+                              if (_isPatentSearch) {
+                                setState(() {
+                                  _isPatentSearch = false;
+                                });
+                              }
+                            },
+                          ),
+                          const SizedBox(width: 4),
+                          _buildToggleOption(
+                            icon: Icons.verified_outlined,
+                            label: 'Patents',
+                            isSelected: _isPatentSearch,
+                            onTap: () {
+                              if (!_isPatentSearch) {
+                                setState(() {
+                                  _isPatentSearch = true;
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
                 Container(height: 1, color: AppTheme.divider),
                 const SizedBox(height: 24),
-                Container(
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                    child: Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.glassSurface,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppTheme.border),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.02),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 32,
+                        offset: const Offset(0, 12),
+                        spreadRadius: -4,
+                      ),
+                      BoxShadow(
+                        color: Colors.white.withOpacity(0.5),
+                        blurRadius: 1,
+                        offset: const Offset(0, -1),
                       ),
                     ],
                   ),
@@ -721,7 +832,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'RELATED PAPER SEARCH',
+                        _isPatentSearch ? 'PATENT SEARCH' : 'RELATED PAPER SEARCH',
                         style: GoogleFonts.interTight(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -738,7 +849,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               textInputAction: TextInputAction.search,
                               onSubmitted: (_) => _runPaperSearch(),
                               decoration: InputDecoration(
-                                hintText: 'Enter a topic or keyword',
+                                hintText: _isPatentSearch
+                                    ? 'Describe the patent you\'re looking for...'
+                                    : 'Describe what you\'re researching...',
                                 prefixIcon: const Icon(Icons.search_rounded),
                                 filled: true,
                                 fillColor: Colors.white,
@@ -789,6 +902,50 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
+                      if (_isPatentSearch) ...[  
+                        const SizedBox(height: 14),
+                        Text(
+                          'PATENT OFFICES',
+                          style: GoogleFonts.interTight(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textTertiary,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _buildPatentOfficeChip(
+                              label: 'USPTO (US)',
+                              icon: Icons.flag_rounded,
+                              isSelected: _searchUSPatents,
+                              onTap: () {
+                                setState(() {
+                                  _searchUSPatents = !_searchUSPatents;
+                                  if (!_searchUSPatents && !_searchINPatents) {
+                                    _searchINPatents = true;
+                                  }
+                                });
+                              },
+                            ),
+                            const SizedBox(width: 10),
+                            _buildPatentOfficeChip(
+                              label: 'IPO (India)',
+                              icon: Icons.flag_circle_rounded,
+                              isSelected: _searchINPatents,
+                              onTap: () {
+                                setState(() {
+                                  _searchINPatents = !_searchINPatents;
+                                  if (!_searchINPatents && !_searchUSPatents) {
+                                    _searchUSPatents = true;
+                                  }
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
                       if (_searchError.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         Text(
@@ -801,6 +958,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ],
                   ),
+                ),
+                ),
                 ),
                 const SizedBox(height: 24),
                 _buildSearchResults(),
@@ -899,17 +1058,27 @@ class _HomeScreenState extends State<HomeScreen> {
     required List<Map<String, dynamic>> items,
     required String emptyMessage,
   }) {
-    return Container(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.glassSurface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
+            spreadRadius: -4,
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.5),
+            blurRadius: 1,
+            offset: const Offset(0, -1),
           ),
         ],
       ),
@@ -952,6 +1121,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
         ],
       ),
+    ),
+    ),
     );
   }
 
@@ -1021,17 +1192,28 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSearchResults() {
-    return Container(
+    final currentResults = _isPatentSearch ? _patentSearchResults : _paperSearchResults;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.glassSurface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppTheme.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 32,
+            offset: const Offset(0, 12),
+            spreadRadius: -4,
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.5),
+            blurRadius: 1,
+            offset: const Offset(0, -1),
           ),
         ],
       ),
@@ -1044,7 +1226,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 'RESULTS',
                 style: AppTheme.labelSmall(),
               ),
-              if (_paperSearchResults.isNotEmpty) ...[
+              if (currentResults.isNotEmpty) ...[
                 const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -1053,7 +1235,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    '${_paperSearchResults.length}',
+                    '${currentResults.length}',
                     style: GoogleFonts.interTight(
                       fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.primary),
                   ),
@@ -1062,6 +1244,49 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 12),
+          // LLM Optimized Query Banner
+          if (_llmOptimizedQuery.isNotEmpty) ...[  
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppTheme.infoLight,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppTheme.info.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.auto_awesome_rounded, size: 16, color: AppTheme.info),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'LLM optimized: ',
+                            style: GoogleFonts.interTight(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.info,
+                            ),
+                          ),
+                          TextSpan(
+                            text: _llmOptimizedQuery,
+                            style: GoogleFonts.interTight(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.info,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           if (_isSearching)
             Column(
               children: List.generate(4, (index) => Container(
@@ -1100,21 +1325,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               )),
             )
-          else if (_paperSearchResults.isEmpty)
+          else if (currentResults.isEmpty)
             Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 32),
                 child: Column(
                   children: [
-                    Icon(Icons.search_rounded, size: 32, color: AppTheme.textTertiary),
+                    Icon(
+                      _isPatentSearch ? Icons.verified_outlined : Icons.search_rounded,
+                      size: 32, color: AppTheme.textTertiary),
                     const SizedBox(height: 12),
                     Text(
-                      'Run a search to see results here.',
+                      _isPatentSearch
+                          ? 'Run a search to see patents here.'
+                          : 'Run a search to see results here.',
                       style: AppTheme.bodyMedium(),
                     ),
                   ],
                 ),
               ),
+            )
+          else if (_isPatentSearch)
+            Column(
+              children: _patentSearchResults
+                  .map((patent) => _buildPatentItem(patent))
+                  .toList(),
             )
           else
             Column(
@@ -1129,6 +1364,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
         ],
       ),
+    ),
+    ),
     );
   }
 
@@ -1159,7 +1396,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final query = _searchController.text.trim();
     if (query.isEmpty) {
       setState(() {
-        _searchError = 'Please enter a topic or keyword.';
+        _searchError = _isPatentSearch
+            ? 'Please describe what patent you\'re looking for.'
+            : 'Please describe what you\'re researching.';
       });
       return;
     }
@@ -1167,18 +1406,50 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _isSearching = true;
       _searchError = '';
-      _paperSearchResults = [];
+      _llmOptimizedQuery = '';
+      if (_isPatentSearch) {
+        _patentSearchResults = [];
+      } else {
+        _paperSearchResults = [];
+      }
     });
 
     try {
-      final results = await _fetchRealPapers(query);
-      setState(() {
-        _paperSearchResults = results;
-      });
-      await _addHistoryEntry(
-        topic: query,
-        details: 'Related papers search',
-      );
+      // Step 1: Use LLM to optimize the search query
+      String optimizedQuery = query;
+      if (_selectedModel != null) {
+        try {
+          optimizedQuery = await _optimizeQueryWithLLM(query);
+          setState(() {
+            _llmOptimizedQuery = optimizedQuery;
+          });
+        } catch (e) {
+          print('DEBUG: LLM query optimization failed, using raw query: $e');
+          // Fall back to raw query if LLM fails
+          optimizedQuery = query;
+        }
+      }
+
+      // Step 2: Search using the optimized query
+      if (_isPatentSearch) {
+        final results = await _fetchPatents(optimizedQuery);
+        setState(() {
+          _patentSearchResults = results;
+        });
+        await _addHistoryEntry(
+          topic: query,
+          details: 'Patent search${_llmOptimizedQuery.isNotEmpty ? " (LLM: $_llmOptimizedQuery)" : ""}',
+        );
+      } else {
+        final results = await _fetchRealPapers(optimizedQuery);
+        setState(() {
+          _paperSearchResults = results;
+        });
+        await _addHistoryEntry(
+          topic: query,
+          details: 'Related papers search${_llmOptimizedQuery.isNotEmpty ? " (LLM: $_llmOptimizedQuery)" : ""}',
+        );
+      }
     } catch (e) {
       setState(() {
         _searchError = 'Search failed: ${e.toString()}';
@@ -1190,14 +1461,98 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  /// Uses the local Ollama LLM to convert a natural language description
+  /// into the best optimized search keywords for academic/patent APIs.
+  Future<String> _optimizeQueryWithLLM(String userDescription) async {
+    final searchType = _isPatentSearch ? 'patent' : 'academic paper';
+    final prompt = '''
+You are a search query optimizer for $searchType databases.
+
+The user described what they're looking for in natural language. Your job is to convert their description into the most effective search keywords that will return the best results from ${_isPatentSearch ? 'patent databases (USPTO, Indian Patent Office)' : 'academic databases (OpenAlex, Crossref)'}.
+
+User's description: "$userDescription"
+
+Rules:
+- Extract the core technical terms, concepts, and domain-specific keywords
+- Remove filler words, keep only high-value search terms
+- Add relevant synonyms or alternative technical terms if helpful
+- Keep it concise: 3-8 keywords/phrases maximum
+- For patents: focus on technical claims, invention categories, and IPC-relevant terms
+- For papers: focus on research topics, methodologies, and field-specific terminology
+- Return ONLY the optimized search query string, nothing else
+
+Return valid JSON with this exact structure:
+{"optimized_query": "your optimized search keywords here"}
+''';
+
+    final response = await http.post(
+      Uri.parse('$_ollamaIp/api/generate'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'model': _selectedModel,
+        'prompt': prompt,
+        'stream': false,
+        'format': 'json',
+        'options': {
+          'temperature': 0.3,
+          'top_p': 0.9,
+          'num_predict': 256,
+        }
+      }),
+    ).timeout(const Duration(seconds: 30));
+
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body);
+      final llmResponse = jsonResponse['response']?.toString() ?? '';
+
+      try {
+        String cleaned = llmResponse.trim();
+        if (cleaned.startsWith('```json')) {
+          cleaned = cleaned.replaceFirst('```json', '').trim();
+        }
+        if (cleaned.startsWith('```')) {
+          cleaned = cleaned.replaceFirst('```', '').trim();
+        }
+        if (cleaned.endsWith('```')) {
+          cleaned = cleaned.substring(0, cleaned.lastIndexOf('```')).trim();
+        }
+
+        final parsed = jsonDecode(cleaned);
+        final optimized = parsed['optimized_query']?.toString() ?? '';
+        if (optimized.isNotEmpty) {
+          print('DEBUG: LLM optimized query: "$userDescription" -> "$optimized"');
+          return optimized;
+        }
+      } catch (e) {
+        print('DEBUG: Failed to parse LLM query response: $e');
+      }
+    }
+
+    // Fallback to raw query
+    return userDescription;
+  }
+
   Widget _buildRelatedPapersPanel() {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       width: _isRelatedPanelCollapsed ? 48 : 320,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(left: BorderSide(color: AppTheme.border)),
+      decoration: BoxDecoration(
+        color: AppTheme.glassSurface,
+        border: const Border(left: BorderSide(color: AppTheme.border)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 24,
+            offset: const Offset(-4, 0),
+            spreadRadius: -4,
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.4),
+            blurRadius: 1,
+            offset: const Offset(1, 0),
+          ),
+        ],
       ),
       child: _isRelatedPanelCollapsed
           ? Column(
@@ -1433,14 +1788,22 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(24),
             transform: isHovered ? (Matrix4.identity()..translate(0.0, -2.0)) : Matrix4.identity(),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isHovered ? AppTheme.glassSurface : AppTheme.glassSurface.withOpacity(0.7),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: isHovered ? AppTheme.borderFocus : Colors.white),
+              border: Border.all(
+                color: isHovered ? AppTheme.borderFocus : AppTheme.border,
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0x0A000000),
-                  blurRadius: isHovered ? 30 : 20,
+                  color: Colors.black.withOpacity(isHovered ? 0.06 : 0.03),
+                  blurRadius: isHovered ? 36 : 24,
                   offset: Offset(0, isHovered ? 14 : 10),
+                  spreadRadius: -4,
+                ),
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.5),
+                  blurRadius: 1,
+                  offset: const Offset(0, -1),
                 ),
               ],
             ),
@@ -1665,6 +2028,537 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // --- Toggle Option Widget for Papers/Patents ---
+  Widget _buildToggleOption({
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppTheme.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? Colors.white : AppTheme.textSecondary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.interTight(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? Colors.white : AppTheme.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- Patent Item Widget ---
+  Widget _buildPatentItem(Map<String, String> patent) {
+    final title = patent['title'] ?? 'Untitled Patent';
+    final patentNumber = patent['patent_number'] ?? '';
+    final assignee = patent['assignee'] ?? '';
+    final date = patent['date'] ?? '';
+    final abstract_ = patent['abstract'] ?? '';
+    final url = patent['url'] ?? '';
+    final office = patent['office'] ?? '';
+
+    final bool isIndian = office == 'IPO';
+    final Color officeColor = isIndian ? const Color(0xFFFF9933) : AppTheme.info;
+    final Color officeBgColor = isIndian ? const Color(0xFFFFF3E0) : AppTheme.infoLight;
+
+    return StatefulBuilder(
+      builder: (context, setLocalState) {
+        bool isHovered = false;
+        return MouseRegion(
+          onEnter: (_) => setLocalState(() => isHovered = true),
+          onExit: (_) => setLocalState(() => isHovered = false),
+          cursor: url.isNotEmpty ? SystemMouseCursors.click : SystemMouseCursors.basic,
+          child: GestureDetector(
+            onTap: url.isNotEmpty ? () => _launchUrl(url) : null,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: isHovered ? AppTheme.surfaceHover.withOpacity(0.8) : AppTheme.glassSurface.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isHovered ? AppTheme.borderFocus : AppTheme.border,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.warningLight,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.verified_outlined,
+                        color: AppTheme.warning, size: 18),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: GoogleFonts.interTight(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
+                          children: [
+                            if (office.isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: officeBgColor,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(office,
+                                  style: GoogleFonts.interTight(
+                                    fontSize: 10, fontWeight: FontWeight.w700,
+                                    color: officeColor)),
+                              ),
+                            if (patentNumber.isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.warningLight,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(patentNumber,
+                                  style: GoogleFonts.interTight(
+                                    fontSize: 10, fontWeight: FontWeight.w600,
+                                    color: AppTheme.warning)),
+                              ),
+                            if (date.isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.backgroundAlt,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(date,
+                                  style: GoogleFonts.interTight(
+                                    fontSize: 10, fontWeight: FontWeight.w600,
+                                    color: AppTheme.textSecondary)),
+                              ),
+                            if (url.isNotEmpty)
+                              Text('Click to open',
+                                style: GoogleFonts.interTight(
+                                  fontSize: 10, color: AppTheme.primary,
+                                  fontWeight: FontWeight.w500)),
+                          ],
+                        ),
+                        if (assignee.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Icon(Icons.business_rounded, size: 12, color: AppTheme.textTertiary),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  assignee,
+                                  style: GoogleFonts.interTight(
+                                    fontSize: 11,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (abstract_.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            abstract_,
+                            style: GoogleFonts.interTight(
+                              fontSize: 11,
+                              color: AppTheme.textTertiary,
+                              height: 1.4,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (url.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8, top: 2),
+                      child: Icon(Icons.open_in_new_rounded,
+                          size: 14, color: AppTheme.primary),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // --- Patent Office Filter Chip Widget ---
+  Widget _buildPatentOfficeChip({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primarySubtle : AppTheme.background,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? AppTheme.primary : AppTheme.border,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? Icons.check_circle_rounded : icon,
+              size: 16,
+              color: isSelected ? AppTheme.primary : AppTheme.textTertiary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: GoogleFonts.interTight(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- Fetch Patents from USPTO & Indian Patent Office ---
+  Future<List<Map<String, String>>> _fetchPatents(String query) async {
+    List<Map<String, String>> allPatents = [];
+    final encodedQuery = Uri.encodeComponent(query);
+
+    // --- USPTO (US Patents) via PatentsView API ---
+    if (_searchUSPatents) {
+      try {
+        // PatentsView API - new endpoint format
+        final body = jsonEncode({
+          "q": {"_text_any": {"patent_abstract": query}},
+          "f": ["patent_number", "patent_title", "patent_abstract", "patent_date", "assignee_organization"],
+          "o": {"page": 1, "per_page": 50},
+          "s": [{"patent_date": "desc"}]
+        });
+
+        final response = await http.post(
+          Uri.parse('https://api.patentsview.org/patents/query'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: body,
+        ).timeout(const Duration(seconds: 20));
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final patents = data['patents'] as List? ?? [];
+
+          for (var patent in patents) {
+            final title = patent['patent_title']?.toString() ?? '';
+            if (title.isEmpty) continue;
+
+            final patentNumber = patent['patent_number']?.toString() ?? '';
+            final patentDate = patent['patent_date']?.toString() ?? '';
+            final abstract_ = patent['patent_abstract']?.toString() ?? '';
+
+            String assignee = '';
+            final assignees = patent['assignees'] as List?;
+            if (assignees != null && assignees.isNotEmpty) {
+              assignee = assignees[0]['assignee_organization']?.toString() ?? '';
+            }
+
+            final patentUrl = patentNumber.isNotEmpty
+                ? 'https://patents.google.com/patent/US$patentNumber'
+                : '';
+
+            String shortAbstract = abstract_;
+            if (shortAbstract.length > 200) {
+              shortAbstract = '${shortAbstract.substring(0, 200)}...';
+            }
+
+            allPatents.add({
+              'title': title,
+              'patent_number': patentNumber.isNotEmpty ? 'US$patentNumber' : '',
+              'date': patentDate,
+              'assignee': assignee,
+              'abstract': shortAbstract,
+              'url': patentUrl,
+              'office': 'USPTO',
+            });
+          }
+        }
+        print('DEBUG: Fetched ${allPatents.length} patents from USPTO PatentsView');
+      } catch (e) {
+        print('DEBUG: USPTO PatentsView API error: $e');
+      }
+
+      // Fallback: use Google Patents search for US patents
+      if (allPatents.where((p) => p['office'] == 'USPTO').isEmpty) {
+        try {
+          // Use Google Patents search via SerpAPI-like scraping or direct link
+          // We'll use the Lens.org free API as a fallback
+          final lensUrl =
+              'https://api.lens.org/patent/search';
+          final lensBody = jsonEncode({
+            "query": {
+              "bool": {
+                "must": [
+                  {"match": {"title": query}},
+                  {"match": {"jurisdiction": "US"}}
+                ]
+              }
+            },
+            "size": 30,
+            "sort": [{"date_published": "desc"}],
+            "include": ["lens_id", "title", "abstract", "date_published", "biblio.parties.applicants", "doc_number", "jurisdiction"]
+          });
+
+          final lensResponse = await http.post(
+            Uri.parse(lensUrl),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+            body: lensBody,
+          ).timeout(const Duration(seconds: 15));
+
+          if (lensResponse.statusCode == 200) {
+            final data = jsonDecode(lensResponse.body);
+            final results = data['data'] as List? ?? [];
+            for (var item in results) {
+              final title = item['title']?.toString() ?? '';
+              if (title.isEmpty) continue;
+
+              final docNum = item['doc_number']?.toString() ?? '';
+              final datePub = item['date_published']?.toString() ?? '';
+              final abstract_ = item['abstract']?.toString() ?? '';
+              final lensId = item['lens_id']?.toString() ?? '';
+
+              String assignee = '';
+              try {
+                final applicants = item['biblio']?['parties']?['applicants'] as List?;
+                if (applicants != null && applicants.isNotEmpty) {
+                  assignee = applicants[0]['extracted_name']?['value']?.toString() ?? '';
+                }
+              } catch (_) {}
+
+              String shortAbstract = abstract_;
+              if (shortAbstract.length > 200) {
+                shortAbstract = '${shortAbstract.substring(0, 200)}...';
+              }
+
+              allPatents.add({
+                'title': title,
+                'patent_number': docNum.isNotEmpty ? 'US$docNum' : '',
+                'date': datePub,
+                'assignee': assignee,
+                'abstract': shortAbstract,
+                'url': lensId.isNotEmpty
+                    ? 'https://www.lens.org/lens/patent/$lensId'
+                    : (docNum.isNotEmpty ? 'https://patents.google.com/patent/US$docNum' : ''),
+                'office': 'USPTO',
+              });
+            }
+          }
+          print('DEBUG: Lens.org fallback for US patents, total: ${allPatents.length}');
+        } catch (e) {
+          print('DEBUG: Lens.org API error (non-critical): $e');
+        }
+      }
+
+      // Final fallback: generate Google Patents search links
+      if (allPatents.where((p) => p['office'] == 'USPTO').isEmpty) {
+        allPatents.add({
+          'title': 'Search US Patents for: "$query"',
+          'patent_number': '',
+          'date': '',
+          'assignee': 'Click to search on Google Patents',
+          'abstract': 'Direct search on Google Patents with country filter US.',
+          'url': 'https://patents.google.com/?q=$encodedQuery&country=US&oq=$encodedQuery',
+          'office': 'USPTO',
+        });
+        allPatents.add({
+          'title': 'Search US Patents for: "$query"',
+          'patent_number': '',
+          'date': '',
+          'assignee': 'Click to search on USPTO',
+          'abstract': 'Direct search on the United States Patent and Trademark Office.',
+          'url': 'https://ppubs.uspto.gov/pubwebapp/static/pages/searchable/search.html',
+          'office': 'USPTO',
+        });
+      }
+    }
+
+    // --- Indian Patent Office (IPO) ---
+    if (_searchINPatents) {
+      try {
+        // IPIndia patent search API
+        final ipoUrl =
+            'https://search.ipindia.gov.in/IPOJournal/Patent/ViewPatent?Query=$encodedQuery';
+        // IPIndia doesn't have a public JSON API, so we use the Google Patents API with IN jurisdiction
+        final googlePatentsINUrl =
+            'https://patents.google.com/?q=$encodedQuery&country=IN&oq=$encodedQuery';
+
+        // Try Lens.org for Indian patents
+        final lensUrl = 'https://api.lens.org/patent/search';
+        final lensBody = jsonEncode({
+          "query": {
+            "bool": {
+              "must": [
+                {"match": {"title": query}},
+                {"match": {"jurisdiction": "IN"}}
+              ]
+            }
+          },
+          "size": 30,
+          "sort": [{"date_published": "desc"}],
+          "include": ["lens_id", "title", "abstract", "date_published", "biblio.parties.applicants", "doc_number", "jurisdiction"]
+        });
+
+        final lensResponse = await http.post(
+          Uri.parse(lensUrl),
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: lensBody,
+        ).timeout(const Duration(seconds: 15));
+
+        if (lensResponse.statusCode == 200) {
+          final data = jsonDecode(lensResponse.body);
+          final results = data['data'] as List? ?? [];
+          for (var item in results) {
+            final title = item['title']?.toString() ?? '';
+            if (title.isEmpty) continue;
+
+            if (allPatents.any((p) => p['title']?.toLowerCase() == title.toLowerCase())) {
+              continue;
+            }
+
+            final docNum = item['doc_number']?.toString() ?? '';
+            final datePub = item['date_published']?.toString() ?? '';
+            final abstract_ = item['abstract']?.toString() ?? '';
+            final lensId = item['lens_id']?.toString() ?? '';
+
+            String assignee = '';
+            try {
+              final applicants = item['biblio']?['parties']?['applicants'] as List?;
+              if (applicants != null && applicants.isNotEmpty) {
+                assignee = applicants[0]['extracted_name']?['value']?.toString() ?? '';
+              }
+            } catch (_) {}
+
+            String shortAbstract = abstract_;
+            if (shortAbstract.length > 200) {
+              shortAbstract = '${shortAbstract.substring(0, 200)}...';
+            }
+
+            allPatents.add({
+              'title': title,
+              'patent_number': docNum.isNotEmpty ? 'IN$docNum' : '',
+              'date': datePub,
+              'assignee': assignee,
+              'abstract': shortAbstract,
+              'url': lensId.isNotEmpty
+                  ? 'https://www.lens.org/lens/patent/$lensId'
+                  : (docNum.isNotEmpty ? 'https://patents.google.com/patent/IN$docNum' : googlePatentsINUrl),
+              'office': 'IPO',
+            });
+          }
+        }
+        print('DEBUG: Fetched Indian patents from Lens.org');
+      } catch (e) {
+        print('DEBUG: Indian patent Lens.org error: $e');
+      }
+
+      // Fallback: generate direct search links for Indian patents
+      if (allPatents.where((p) => p['office'] == 'IPO').isEmpty) {
+        allPatents.add({
+          'title': 'Search Indian Patents for: "$query"',
+          'patent_number': '',
+          'date': '',
+          'assignee': 'Click to search on Google Patents (India)',
+          'abstract': 'Search Google Patents filtered to Indian jurisdiction.',
+          'url': 'https://patents.google.com/?q=$encodedQuery&country=IN&oq=$encodedQuery',
+          'office': 'IPO',
+        });
+        allPatents.add({
+          'title': 'Search Indian Patents for: "$query"',
+          'patent_number': '',
+          'date': '',
+          'assignee': 'Click to search on IPIndia',
+          'abstract': 'Direct search on the Indian Patent Office (Controller General of Patents).',
+          'url': 'https://iprsearch.ipindia.gov.in/PublicSearch/PublicSearchPatent/PatentSearch',
+          'office': 'IPO',
+        });
+      }
+    }
+
+    // Sort by date descending (newest first)
+    allPatents.sort((a, b) {
+      final dateA = a['date'] ?? '';
+      final dateB = b['date'] ?? '';
+      return dateB.compareTo(dateA);
+    });
+
+    return allPatents;
+  }
+
   String? _extractYear(String citation) {
     final match = RegExp(r'\((\d{4})\)').firstMatch(citation);
     return match?.group(1);
@@ -1685,11 +2579,28 @@ class _HomeScreenState extends State<HomeScreen> {
               margin: const EdgeInsets.only(bottom: 10),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isHovered ? AppTheme.surfaceHover : Colors.white,
+                color: isHovered ? AppTheme.surfaceHover.withOpacity(0.8) : AppTheme.glassSurface.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isHovered ? AppTheme.borderFocus : AppTheme.border,
                 ),
+                boxShadow: isHovered
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.06),
+                          blurRadius: 20,
+                          offset: const Offset(0, 6),
+                          spreadRadius: -4,
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                          spreadRadius: -2,
+                        ),
+                      ],
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
