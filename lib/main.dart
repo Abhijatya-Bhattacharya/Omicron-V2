@@ -12,55 +12,46 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// --- App Theme and Configuration ---
 class AppTheme {
-  // Core Brand
-  static const Color primary = Color(0xFFA01B2D);
-  static const Color primaryLight = Color(0xFFD63B52);
-  static const Color primaryDark = Color(0xFF720F1D);
-  static const Color primarySubtle = Color(0xFFFDF2F4);
+  static const Color primary = Color(0xFF8B2D3A);
+  static const Color primaryLight = Color(0xFFAD4455);
+  static const Color primaryDark = Color(0xFF6B1F2C);
+  static const Color primarySubtle = Color(0xFFF5EAEC);
 
-  // Surfaces
-  static const Color background = Color(0xFFF9FAFB);
-  static const Color backgroundAlt = Color(0xFFECEFF1);
+  static const Color background = Color(0xFFF2F0ED);
+  static const Color backgroundAlt = Color(0xFFEAE7E3);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceHover = Color(0xFFF1F5F9);
-  static const Color surfacePressed = Color(0xFFE2E8F0);
+  static const Color surfaceHover = Color(0xFFF7F6F4);
+  static const Color surfacePressed = Color(0xFFEDEBE8);
 
-  // Text
-  static const Color textPrimary = Color(0xFF0D1117);
-  static const Color textSecondary = Color(0xFF4A5568);
-  static const Color textTertiary = Color(0xFF718096);
+  static const Color textPrimary = Color(0xFF1A1A1A);
+  static const Color textSecondary = Color(0xFF5C5C5C);
+  static const Color textTertiary = Color(0xFF8A8A8A);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
 
-  // Borders & Dividers (frosted glass style)
-  static const Color border = Color(0x1A000000);        // 10% black
-  static const Color borderFocus = Color(0x33000000);    // 20% black
-  static const Color divider = Color(0x14000000);        // 8% black
-  static const Color glassBorder = Color(0x22FFFFFF);    // subtle white edge
-  static const Color glassSurface = Color(0xCCFFFFFF);   // 80% white
+  static const Color border = Color(0x12000000);
+  static const Color borderFocus = Color(0x20000000);
+  static const Color divider = Color(0x0A000000);
+  static const Color glassBorder = Color(0x0E000000);
+  static const Color glassSurface = Color(0xDEFFFFFF);
 
-  // Semantic / Status
-  static const Color success = Color(0xFF16A34A);
-  static const Color successLight = Color(0xFFDCFCE7);
-  static const Color warning = Color(0xFFD97706);
-  static const Color warningLight = Color(0xFFFEF3C7);
-  static const Color error = Color(0xFFDC2626);
-  static const Color errorLight = Color(0xFFFEE2E2);
-  static const Color info = Color(0xFF2563EB);
-  static const Color infoLight = Color(0xFFDBEAFE);
+  static const Color success = Color(0xFF2D8A5E);
+  static const Color successLight = Color(0xFFE6F4ED);
+  static const Color warning = Color(0xFFC08B2D);
+  static const Color warningLight = Color(0xFFFAF3E6);
+  static const Color error = Color(0xFFBF3B3B);
+  static const Color errorLight = Color(0xFFF9EAEA);
+  static const Color info = Color(0xFF3B6DBF);
+  static const Color infoLight = Color(0xFFE8EFF9);
 
-  // Sidebar
-  static const Color sidebarBg = Color(0xFF1E1E24);
-  static const Color sidebarHover = Color(0xFF2A2A32);
-  static const Color sidebarActive = Color(0xFF33333D);
+  static const Color sidebarBg = Color(0xFF1E1E22);
+  static const Color sidebarHover = Color(0xFF2A2A2F);
+  static const Color sidebarActive = Color(0xFF333338);
 
-  // Misc
-  static const Color iconColor = Color(0xFF4A5568);
-  static const Color shimmerBase = Color(0xFFE2E8F0);
-  static const Color shimmerHighlight = Color(0xFFF1F5F9);
+  static const Color iconColor = Color(0xFF5C5C5C);
+  static const Color shimmerBase = Color(0xFFE8E5E1);
+  static const Color shimmerHighlight = Color(0xFFF2F0ED);
 
-  // Typography Scale
   static TextStyle displayLarge() => GoogleFonts.interTight(
       fontSize: 32, fontWeight: FontWeight.w800, color: textPrimary, letterSpacing: -0.5, height: 1.2);
   static TextStyle displayMedium() => GoogleFonts.interTight(
@@ -140,8 +131,13 @@ class OmicronApp extends StatelessWidget {
       title: 'Omicron',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        brightness: Brightness.light,
         primaryColor: AppTheme.primary,
-        colorScheme: ColorScheme.fromSeed(seedColor: AppTheme.primary),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppTheme.primary,
+          brightness: Brightness.light,
+          surface: AppTheme.surface,
+        ),
         textTheme: GoogleFonts.interTightTextTheme(),
         scaffoldBackgroundColor: Colors.transparent,
         useMaterial3: true,
@@ -219,11 +215,11 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              AppTheme.background,
-              AppTheme.backgroundAlt,
+              Color(0xFFF2F0ED),
+              Color(0xFFECE9E5),
             ],
           ),
         ),
@@ -241,13 +237,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSidebar() {
     return Container(
       width: 80,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppTheme.sidebarBg,
+        border: const Border(
+          right: BorderSide(color: Color(0x08000000), width: 1),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black26,
-            blurRadius: 20,
-            offset: Offset(4, 0),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(2, 0),
           ),
         ],
       ),
@@ -556,25 +555,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(24),
                   child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                    filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                     child: Container(
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
                     color: AppTheme.glassSurface,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppTheme.border),
+                    border: Border.all(color: AppTheme.glassBorder),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 40,
-                        offset: const Offset(0, 16),
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 32,
+                        offset: const Offset(0, 8),
                         spreadRadius: -4,
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.6),
-                        blurRadius: 1,
-                        offset: const Offset(0, -1),
-                        spreadRadius: 0,
                       ),
                     ],
                   ),
@@ -813,18 +806,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: BoxDecoration(
                     color: AppTheme.glassSurface,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.border),
+                    border: Border.all(color: AppTheme.glassBorder),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 32,
-                        offset: const Offset(0, 12),
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 24,
+                        offset: const Offset(0, 6),
                         spreadRadius: -4,
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.5),
-                        blurRadius: 1,
-                        offset: const Offset(0, -1),
                       ),
                     ],
                   ),
@@ -853,7 +841,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ? 'Describe the patent you\'re looking for...'
                                     : 'Describe what you\'re researching...',
                                 prefixIcon: const Icon(Icons.search_rounded),
-                                filled: true,
+                               filled: true,
                                 fillColor: Colors.white,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -1061,24 +1049,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
         child: Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppTheme.glassSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: AppTheme.glassBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
-            blurRadius: 32,
-            offset: const Offset(0, 12),
+            blurRadius: 24,
+            offset: const Offset(0, 6),
             spreadRadius: -4,
-          ),
-          BoxShadow(
-            color: Colors.white.withOpacity(0.5),
-            blurRadius: 1,
-            offset: const Offset(0, -1),
           ),
         ],
       ),
@@ -1140,7 +1123,7 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.background,
+        color: AppTheme.surfaceHover,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.border),
       ),
@@ -1196,24 +1179,19 @@ class _HomeScreenState extends State<HomeScreen> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
         child: Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: AppTheme.glassSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: AppTheme.glassBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
-            blurRadius: 32,
-            offset: const Offset(0, 12),
+            blurRadius: 24,
+            offset: const Offset(0, 6),
             spreadRadius: -4,
-          ),
-          BoxShadow(
-            color: Colors.white.withOpacity(0.5),
-            blurRadius: 1,
-            offset: const Offset(0, -1),
           ),
         ],
       ),
@@ -1293,7 +1271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppTheme.surfaceHover,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppTheme.border),
                 ),
@@ -1539,18 +1517,13 @@ Return valid JSON with this exact structure:
       width: _isRelatedPanelCollapsed ? 48 : 320,
       decoration: BoxDecoration(
         color: AppTheme.glassSurface,
-        border: const Border(left: BorderSide(color: AppTheme.border)),
+        border: const Border(left: BorderSide(color: AppTheme.glassBorder, width: 1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 24,
-            offset: const Offset(-4, 0),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(-2, 0),
             spreadRadius: -4,
-          ),
-          BoxShadow(
-            color: Colors.white.withOpacity(0.4),
-            blurRadius: 1,
-            offset: const Offset(1, 0),
           ),
         ],
       ),
@@ -1729,15 +1702,15 @@ Return valid JSON with this exact structure:
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
             decoration: BoxDecoration(
-              color: isFocused ? Colors.white : AppTheme.background,
+              color: isFocused ? Colors.white : AppTheme.surfaceHover,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isFocused ? AppTheme.primary : AppTheme.border,
+                color: isFocused ? AppTheme.primary.withOpacity(0.5) : AppTheme.border,
                 width: isFocused ? 1.5 : 1.0,
               ),
               boxShadow: isFocused
                   ? [BoxShadow(
-                      color: AppTheme.primary.withOpacity(0.08),
+                      color: AppTheme.primary.withOpacity(0.06),
                       blurRadius: 0,
                       spreadRadius: 3,
                     )]
@@ -1788,22 +1761,17 @@ Return valid JSON with this exact structure:
             padding: const EdgeInsets.all(24),
             transform: isHovered ? (Matrix4.identity()..translate(0.0, -2.0)) : Matrix4.identity(),
             decoration: BoxDecoration(
-              color: isHovered ? AppTheme.glassSurface : AppTheme.glassSurface.withOpacity(0.7),
+              color: isHovered ? AppTheme.glassSurface : AppTheme.glassSurface.withOpacity(0.75),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isHovered ? AppTheme.borderFocus : AppTheme.border,
+                color: isHovered ? AppTheme.borderFocus : AppTheme.glassBorder,
               ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(isHovered ? 0.06 : 0.03),
-                  blurRadius: isHovered ? 36 : 24,
-                  offset: Offset(0, isHovered ? 14 : 10),
+                  blurRadius: isHovered ? 28 : 20,
+                  offset: Offset(0, isHovered ? 10 : 6),
                   spreadRadius: -4,
-                ),
-                BoxShadow(
-                  color: Colors.white.withOpacity(0.5),
-                  blurRadius: 1,
-                  offset: const Offset(0, -1),
                 ),
               ],
             ),
@@ -1871,7 +1839,7 @@ Return valid JSON with this exact structure:
                               Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.background,
+                                  color: AppTheme.surfaceHover,
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                                 child: Icon(
@@ -2104,7 +2072,7 @@ Return valid JSON with this exact structure:
               margin: const EdgeInsets.only(bottom: 10),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isHovered ? AppTheme.surfaceHover.withOpacity(0.8) : AppTheme.glassSurface.withOpacity(0.5),
+                color: isHovered ? AppTheme.surfaceHover : AppTheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isHovered ? AppTheme.borderFocus : AppTheme.border,
@@ -2579,7 +2547,7 @@ Return valid JSON with this exact structure:
               margin: const EdgeInsets.only(bottom: 10),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: isHovered ? AppTheme.surfaceHover.withOpacity(0.8) : AppTheme.glassSurface.withOpacity(0.5),
+                color: isHovered ? AppTheme.surfaceHover : AppTheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isHovered ? AppTheme.borderFocus : AppTheme.border,
@@ -2587,20 +2555,13 @@ Return valid JSON with this exact structure:
                 boxShadow: isHovered
                     ? [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
-                          blurRadius: 20,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
                           spreadRadius: -4,
                         ),
                       ]
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.02),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                          spreadRadius: -2,
-                        ),
-                      ],
+                    : [],
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -3831,10 +3792,10 @@ CRITICAL: Write REAL content, not instructions. Include specific details, number
             actionsPadding: const EdgeInsets.all(16),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: Colors.grey[300]!, width: 1.5),
+              side: BorderSide(color: AppTheme.border, width: 1),
             ),
             elevation: 8,
-            shadowColor: Colors.black.withOpacity(0.15),
+            shadowColor: Colors.black.withOpacity(0.1),
             title: Row(
               children: [
                 Container(
@@ -3875,14 +3836,14 @@ CRITICAL: Write REAL content, not instructions. Include specific details, number
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppTheme.background,
+                      color: AppTheme.surfaceHover,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color: AppTheme.textSecondary.withOpacity(0.5),
-                          width: 1.5),
+                          color: AppTheme.border,
+                          width: 1),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withOpacity(0.03),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -3957,14 +3918,14 @@ CRITICAL: Write REAL content, not instructions. Include specific details, number
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(
-                              color: AppTheme.textSecondary.withOpacity(0.5),
-                              width: 1.5),
+                              color: AppTheme.border,
+                              width: 1),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(
-                              color: AppTheme.textSecondary.withOpacity(0.5),
-                              width: 1.5),
+                              color: AppTheme.border,
+                              width: 1),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -3974,7 +3935,7 @@ CRITICAL: Write REAL content, not instructions. Include specific details, number
                         prefixIcon: const Icon(Icons.computer,
                             color: AppTheme.textSecondary),
                         filled: true,
-                        fillColor: AppTheme.background,
+                        fillColor: AppTheme.surfaceHover,
                       ),
                     ),
                   ),
@@ -4018,14 +3979,14 @@ CRITICAL: Write REAL content, not instructions. Include specific details, number
                     height: 56,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: AppTheme.background,
+                      color: AppTheme.surfaceHover,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color: AppTheme.textSecondary.withOpacity(0.5),
-                          width: 1.5),
+                          color: AppTheme.border,
+                          width: 1),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withOpacity(0.15),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
