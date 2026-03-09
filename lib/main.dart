@@ -11,6 +11,9 @@ import 'package:pdf/pdf.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'models/research_paper.dart';
+import 'screens/database_screen.dart';
+import 'screens/trend_analysis_screen.dart';
 
 class AppTheme {
   static const Color primary = Color(0xFF8B2D3A);
@@ -187,17 +190,23 @@ class _HomeScreenState extends State<HomeScreen> {
   static const int _tabSearch = 0;
   static const int _tabMain = 1;
   static const int _tabHistory = 2;
+  static const int _tabDatabase = 3;
+  static const int _tabTrends = 4;
   static const int _historyLimit = 50;
 
   int _activeTab = _tabMain;
   List<Map<String, dynamic>> _workHistory = [];
   bool _isRelatedPanelCollapsed = false;
 
+  // --- Research Paper Database ---
+  List<ResearchPaper> _researchPapers = [];
+
   @override
   void initState() {
     super.initState();
     _loadAvailableModels();
     _loadWorkHistory();
+    _loadResearchPapers();
   }
 
   @override
@@ -313,9 +322,35 @@ class _HomeScreenState extends State<HomeScreen> {
             child: _buildNavIcon(Icons.history_rounded, _activeTab == _tabHistory,
                 onTap: () => _setActiveTab(_tabHistory)),
           ),
+          const SizedBox(height: 24),
+          Tooltip(
+            message: 'Research Database',
+            preferBelow: false,
+            waitDuration: const Duration(milliseconds: 400),
+            textStyle: GoogleFonts.interTight(fontSize: 12, color: Colors.white),
+            decoration: BoxDecoration(
+              color: AppTheme.textPrimary,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: _buildNavIcon(Icons.storage_rounded, _activeTab == _tabDatabase,
+                onTap: () => _setActiveTab(_tabDatabase)),
+          ),
+          const SizedBox(height: 24),
+          Tooltip(
+            message: 'Trend Analysis',
+            preferBelow: false,
+            waitDuration: const Duration(milliseconds: 400),
+            textStyle: GoogleFonts.interTight(fontSize: 12, color: Colors.white),
+            decoration: BoxDecoration(
+              color: AppTheme.textPrimary,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: _buildNavIcon(Icons.bar_chart_rounded, _activeTab == _tabTrends,
+                onTap: () => _setActiveTab(_tabTrends)),
+          ),
           const Spacer(),
           Text(
-            'v1.0.0',
+            'v2.0.0',
             style: GoogleFonts.interTight(
               fontSize: 10,
               color: Colors.white24,
@@ -701,6 +736,19 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildSearchContent();
       case _tabHistory:
         return _buildHistoryContent();
+      case _tabDatabase:
+        return DatabaseScreen(
+          papers: _researchPapers,
+          onPapersChanged: (papers) {
+            setState(() => _researchPapers = papers);
+            _saveResearchPapers();
+          },
+        );
+      case _tabTrends:
+        return TrendAnalysisScreen(
+          papers: _researchPapers,
+          llmTrendInsights: _llmGeneratedContent['trend_analysis'] as Map<String, dynamic>?,
+        );
       case _tabMain:
       default:
         return _buildMainContent();
@@ -1218,6 +1266,31 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.primary),
                   ),
                 ),
+                const Spacer(),
+                if (!_isPatentSearch && _paperSearchResults.isNotEmpty)
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      _importSearchResultsToDatabase(_paperSearchResults, topic: _searchController.text.trim());
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Imported ${_paperSearchResults.length} papers to database'),
+                          backgroundColor: AppTheme.success,
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.download_rounded, size: 16),
+                    label: Text('Import to Database',
+                        style: GoogleFonts.interTight(
+                            fontSize: 12, fontWeight: FontWeight.w600)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppTheme.primary,
+                      side: BorderSide(color: AppTheme.primary.withOpacity(0.4)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
               ],
             ],
           ),
@@ -1423,6 +1496,8 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _paperSearchResults = results;
         });
+        // Auto-import search results to database grouped by topic
+        _importSearchResultsToDatabase(results, topic: query);
         await _addHistoryEntry(
           topic: query,
           details: 'Related papers search${_llmOptimizedQuery.isNotEmpty ? " (LLM: $_llmOptimizedQuery)" : ""}',
@@ -2729,6 +2804,35 @@ Return valid JSON with this exact structure:
     });
   }
 
+  // --- Research Paper Database Persistence ---
+  Future<void> _loadResearchPapers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('research_papers');
+    if (raw != null && raw.isNotEmpty) {
+      _researchPapers = decodePapers(raw);
+      if (mounted) setState(() {});
+    }
+  }
+
+  Future<void> _saveResearchPapers() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('research_papers', encodePapers(_researchPapers));
+  }
+
+  /// Import search results into the research database
+  void _importSearchResultsToDatabase(List<Map<String, String>> results, {String? topic}) {
+    for (final r in results) {
+      final paper = ResearchPaper.fromSearchResult(r, topic: topic);
+      // Avoid duplicates by title
+      if (!_researchPapers.any(
+          (p) => p.title.toLowerCase() == paper.title.toLowerCase())) {
+        _researchPapers.add(paper);
+      }
+    }
+    _saveResearchPapers();
+    setState(() {});
+  }
+
   // --- Logic ---
   Future<void> _processRequest() async {
     if (_topicController.text.trim().isEmpty) {
@@ -2828,7 +2932,15 @@ Return ONLY valid JSON in this exact structure (replace ALL field values with ac
       "methodology": "Brief methodology",
       "key_outcome": "Main finding summary"
     }
-  ]
+  ],
+  "trend_analysis": {
+    "overview": "Write 2-3 sentences summarizing research trends in this field",
+    "emerging_topics": ["Topic 1", "Topic 2", "Topic 3"],
+    "declining_topics": ["Topic 1", "Topic 2"],
+    "methodological_trends": "Write 2-3 sentences about how research methods are evolving in this field",
+    "future_directions": "Write 2-3 sentences about where this field is heading",
+    "key_insight": "Write 1-2 sentences about the most important trend observation"
+  }
 }
 
 CRITICAL: Write REAL content, not instructions. Include specific details, numbers, examples. Return ONLY the JSON object.
@@ -2952,6 +3064,11 @@ CRITICAL: Write REAL content, not instructions. Include specific details, number
             decodedResponse['discussion_summary']?.toString() ??
             'No findings provided.';
       });
+
+      // Auto-import papers from literature review to database grouped by topic
+      if (_paperDetails.isNotEmpty) {
+        _importSearchResultsToDatabase(_paperDetails, topic: _topicController.text.trim());
+      }
 
       await _generatePdf();
 
