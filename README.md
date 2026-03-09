@@ -52,16 +52,6 @@ All Ollama Text Generation model Which your pc supports locally
 - **Encrypted Storage**: Research data is encrypted at rest
 - **No Cloud Dependencies**:  Complete offline capability with local LLM
 
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## 📄 License
 
 Copyright (c) 2024 [G-34 Gropup of Meghnad Saha Institute of Technology]
