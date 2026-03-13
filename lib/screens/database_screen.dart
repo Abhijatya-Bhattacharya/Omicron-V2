@@ -166,6 +166,29 @@ class _DatabaseScreenState extends State<DatabaseScreen> {
                     ),
                     Row(
                       children: [
+                        if (widget.papers.isNotEmpty) ...[
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              widget.onPapersChanged([]);
+                            },
+                            icon: const Icon(Icons.delete_sweep_rounded, size: 18),
+                            label: Text('Clear All',
+                                style: GoogleFonts.interTight(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.error.withOpacity(0.1),
+                              foregroundColor: AppTheme.error,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(color: AppTheme.error.withOpacity(0.3))),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                        ],
                         _buildStatBadge(
                             '${widget.papers.length}', 'Total', AppTheme.info),
                         const SizedBox(width: 8),

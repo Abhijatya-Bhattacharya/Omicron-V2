@@ -56,19 +56,36 @@ class AppTheme {
   static const Color shimmerHighlight = Color(0xFFF2F0ED);
 
   static TextStyle displayLarge() => GoogleFonts.interTight(
-      fontSize: 32, fontWeight: FontWeight.w800, color: textPrimary, letterSpacing: -0.5, height: 1.2);
+      fontSize: 32,
+      fontWeight: FontWeight.w800,
+      color: textPrimary,
+      letterSpacing: -0.5,
+      height: 1.2);
   static TextStyle displayMedium() => GoogleFonts.interTight(
-      fontSize: 28, fontWeight: FontWeight.w700, color: textPrimary, letterSpacing: -0.3, height: 1.2);
+      fontSize: 28,
+      fontWeight: FontWeight.w700,
+      color: textPrimary,
+      letterSpacing: -0.3,
+      height: 1.2);
   static TextStyle headlineMedium() => GoogleFonts.interTight(
       fontSize: 18, fontWeight: FontWeight.w700, color: textPrimary);
   static TextStyle titleMedium() => GoogleFonts.interTight(
       fontSize: 16, fontWeight: FontWeight.w600, color: textPrimary);
   static TextStyle bodyLarge() => GoogleFonts.interTight(
-      fontSize: 14, fontWeight: FontWeight.w400, color: textPrimary, height: 1.5);
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      color: textPrimary,
+      height: 1.5);
   static TextStyle bodyMedium() => GoogleFonts.interTight(
-      fontSize: 13, fontWeight: FontWeight.w400, color: textSecondary, height: 1.5);
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      color: textSecondary,
+      height: 1.5);
   static TextStyle labelSmall() => GoogleFonts.interTight(
-      fontSize: 11, fontWeight: FontWeight.w700, color: textSecondary, letterSpacing: 1.2);
+      fontSize: 11,
+      fontWeight: FontWeight.w700,
+      color: textSecondary,
+      letterSpacing: 1.2);
   static TextStyle caption() => GoogleFonts.interTight(
       fontSize: 11, fontWeight: FontWeight.w500, color: textTertiary);
 }
@@ -83,7 +100,9 @@ String _safeString(dynamic value, [String fallback = '']) {
     // Detect if LLM regurgitated the instruction template instead of real content
     if (trimmed.startsWith('Write ') && trimmed.contains('sentences') ||
         trimmed.startsWith('Write ') && trimmed.contains('paragraphs') ||
-        trimmed.startsWith('[') && trimmed.endsWith(']') && trimmed.length < 300 ||
+        trimmed.startsWith('[') &&
+            trimmed.endsWith(']') &&
+            trimmed.length < 300 ||
         trimmed.startsWith('Generate ') && trimmed.contains('content') ||
         trimmed == 'Brief methodology' ||
         trimmed == 'Main finding summary') {
@@ -106,15 +125,16 @@ String _sanitizeForPdf(String text) {
   // Replace common problematic Unicode characters with ASCII equivalents
   String sanitized = text
       .replaceAll(RegExp(r'[\u2018\u2019\u201A\u201B]'), "'") // Smart quotes
-      .replaceAll(RegExp(r'[\u201C\u201D\u201E\u201F]'), '"') // Smart double quotes
-      .replaceAll(RegExp(r'[\u2013\u2014]'), '-')             // En/Em dash
-      .replaceAll(RegExp(r'[\u2026]'), '...')                 // Ellipsis
-      .replaceAll(RegExp(r'[\u00A0]'), ' ')                   // Non-breaking space
-      .replaceAll(RegExp(r'[\u00AD]'), '')                    // Soft hyphen
-      .replaceAll(RegExp(r'[\u2022\u2023\u2043]'), '*')       // Bullets
-      .replaceAll(RegExp(r'[\u2190-\u21FF]'), '->')           // Arrows
-      .replaceAll(RegExp(r'[\u2500-\u257F]'), '-');           // Box drawing
-  
+      .replaceAll(
+          RegExp(r'[\u201C\u201D\u201E\u201F]'), '"') // Smart double quotes
+      .replaceAll(RegExp(r'[\u2013\u2014]'), '-') // En/Em dash
+      .replaceAll(RegExp(r'[\u2026]'), '...') // Ellipsis
+      .replaceAll(RegExp(r'[\u00A0]'), ' ') // Non-breaking space
+      .replaceAll(RegExp(r'[\u00AD]'), '') // Soft hyphen
+      .replaceAll(RegExp(r'[\u2022\u2023\u2043]'), '*') // Bullets
+      .replaceAll(RegExp(r'[\u2190-\u21FF]'), '->') // Arrows
+      .replaceAll(RegExp(r'[\u2500-\u257F]'), '-'); // Box drawing
+
   // Replace any remaining non-ASCII characters with space or remove them
   // Keep basic Latin, Latin-1 Supplement, and common punctuation
   StringBuffer result = StringBuffer();
@@ -189,9 +209,11 @@ class _HomeScreenState extends State<HomeScreen> {
   // --- Patent Search ---
   bool _isPatentSearch = false; // false = Papers, true = Patents
   List<Map<String, String>> _patentSearchResults = [];
-  bool _searchUSPatents = true;  // US Patent Office (USPTO)
-  bool _searchINPatents = true;  // Indian Patent Office (IPO)
-  String _llmOptimizedQuery = '';  // LLM-optimized search query
+  bool _searchUSPatents = true; // US Patent Office (USPTO)
+  bool _searchINPatents = true; // Indian Patent Office (IPO)
+  bool _searchAcademicDBs = true; // OpenAlex & Crossref
+  bool _searchGoogleScholar = false; // Google Scholar Embedded Links
+  String _llmOptimizedQuery = ''; // LLM-optimized search query
 
   // --- Ollama Settings ---
   String _ollamaIp = 'http://localhost:11434';
@@ -302,7 +324,8 @@ class _HomeScreenState extends State<HomeScreen> {
             message: 'Search Papers',
             preferBelow: false,
             waitDuration: const Duration(milliseconds: 400),
-            textStyle: GoogleFonts.interTight(fontSize: 12, color: Colors.white),
+            textStyle:
+                GoogleFonts.interTight(fontSize: 12, color: Colors.white),
             decoration: BoxDecoration(
               color: AppTheme.textPrimary,
               borderRadius: BorderRadius.circular(6),
@@ -315,12 +338,14 @@ class _HomeScreenState extends State<HomeScreen> {
             message: 'Literature Review',
             preferBelow: false,
             waitDuration: const Duration(milliseconds: 400),
-            textStyle: GoogleFonts.interTight(fontSize: 12, color: Colors.white),
+            textStyle:
+                GoogleFonts.interTight(fontSize: 12, color: Colors.white),
             decoration: BoxDecoration(
               color: AppTheme.textPrimary,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: _buildNavIcon(Icons.edit_note_rounded, _activeTab == _tabMain,
+            child: _buildNavIcon(
+                Icons.edit_note_rounded, _activeTab == _tabMain,
                 onTap: () => _setActiveTab(_tabMain)),
           ),
           const SizedBox(height: 24),
@@ -328,12 +353,14 @@ class _HomeScreenState extends State<HomeScreen> {
             message: 'History',
             preferBelow: false,
             waitDuration: const Duration(milliseconds: 400),
-            textStyle: GoogleFonts.interTight(fontSize: 12, color: Colors.white),
+            textStyle:
+                GoogleFonts.interTight(fontSize: 12, color: Colors.white),
             decoration: BoxDecoration(
               color: AppTheme.textPrimary,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: _buildNavIcon(Icons.history_rounded, _activeTab == _tabHistory,
+            child: _buildNavIcon(
+                Icons.history_rounded, _activeTab == _tabHistory,
                 onTap: () => _setActiveTab(_tabHistory)),
           ),
           const SizedBox(height: 24),
@@ -341,12 +368,14 @@ class _HomeScreenState extends State<HomeScreen> {
             message: 'Research Database',
             preferBelow: false,
             waitDuration: const Duration(milliseconds: 400),
-            textStyle: GoogleFonts.interTight(fontSize: 12, color: Colors.white),
+            textStyle:
+                GoogleFonts.interTight(fontSize: 12, color: Colors.white),
             decoration: BoxDecoration(
               color: AppTheme.textPrimary,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: _buildNavIcon(Icons.storage_rounded, _activeTab == _tabDatabase,
+            child: _buildNavIcon(
+                Icons.storage_rounded, _activeTab == _tabDatabase,
                 onTap: () => _setActiveTab(_tabDatabase)),
           ),
           const SizedBox(height: 24),
@@ -354,12 +383,14 @@ class _HomeScreenState extends State<HomeScreen> {
             message: 'Trend Analysis',
             preferBelow: false,
             waitDuration: const Duration(milliseconds: 400),
-            textStyle: GoogleFonts.interTight(fontSize: 12, color: Colors.white),
+            textStyle:
+                GoogleFonts.interTight(fontSize: 12, color: Colors.white),
             decoration: BoxDecoration(
               color: AppTheme.textPrimary,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: _buildNavIcon(Icons.bar_chart_rounded, _activeTab == _tabTrends,
+            child: _buildNavIcon(
+                Icons.bar_chart_rounded, _activeTab == _tabTrends,
                 onTap: () => _setActiveTab(_tabTrends)),
           ),
           const Spacer(),
@@ -378,7 +409,8 @@ class _HomeScreenState extends State<HomeScreen> {
               message: 'Settings',
               preferBelow: false,
               waitDuration: const Duration(milliseconds: 400),
-              textStyle: GoogleFonts.interTight(fontSize: 12, color: Colors.white),
+              textStyle:
+                  GoogleFonts.interTight(fontSize: 12, color: Colors.white),
               decoration: BoxDecoration(
                 color: AppTheme.textPrimary,
                 borderRadius: BorderRadius.circular(6),
@@ -433,7 +465,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               )
                             : null,
-                    color: (!isActive && !isHovered) ? Colors.transparent : null,
+                    color:
+                        (!isActive && !isHovered) ? Colors.transparent : null,
                     borderRadius: BorderRadius.circular(13),
                     border: isActive
                         ? Border.all(
@@ -506,14 +539,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Breadcrumb
                 Row(
                   children: [
-                    Text('Omicron', style: GoogleFonts.interTight(
-                      fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w500)),
+                    Text('Omicron',
+                        style: GoogleFonts.interTight(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                            fontWeight: FontWeight.w500)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Icon(Icons.chevron_right, size: 14, color: AppTheme.textTertiary),
+                      child: Icon(Icons.chevron_right,
+                          size: 14, color: AppTheme.textTertiary),
                     ),
-                    Text('Literature Review', style: GoogleFonts.interTight(
-                      fontSize: 12, color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
+                    Text('Literature Review',
+                        style: GoogleFonts.interTight(
+                            fontSize: 12,
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.w600)),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -606,82 +646,86 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
                     child: Container(
-                  padding: const EdgeInsets.all(32),
-                  decoration: BoxDecoration(
-                    color: AppTheme.glassSurface,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppTheme.glassBorder),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 32,
-                        offset: const Offset(0, 8),
-                        spreadRadius: -4,
+                      padding: const EdgeInsets.all(32),
+                      decoration: BoxDecoration(
+                        color: AppTheme.glassSurface,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: AppTheme.glassBorder),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 32,
+                            offset: const Offset(0, 8),
+                            spreadRadius: -4,
+                          ),
+                        ],
                       ),
-                    ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 3,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primary,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'RESEARCH TOPIC',
+                                style: AppTheme.labelSmall()
+                                    .copyWith(color: AppTheme.primary),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          _buildTextField(
+                              'e.g. The impact of transformer models on NLP efficiency',
+                              _topicController,
+                              icon: Icons.search),
+                          const SizedBox(height: 20),
+                          Container(height: 1, color: AppTheme.divider),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Container(
+                                width: 3,
+                                height: 14,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primary,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'CONTEXT & CONSTRAINTS',
+                                style: AppTheme.labelSmall()
+                                    .copyWith(color: AppTheme.primary),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          _buildTextField(
+                            'Paste abstract, keywords, or specific constraints here...',
+                            _requirementsController,
+                            maxLines: 4,
+                            hasAttachment: true,
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              _buildGenerateButton(),
+                              const SizedBox(width: 16),
+                              _buildClearButton(),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 3, height: 14,
-                            decoration: BoxDecoration(
-                              color: AppTheme.primary,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'RESEARCH TOPIC',
-                            style: AppTheme.labelSmall().copyWith(color: AppTheme.primary),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      _buildTextField(
-                          'e.g. The impact of transformer models on NLP efficiency',
-                          _topicController,
-                          icon: Icons.search),
-                      const SizedBox(height: 20),
-                      Container(height: 1, color: AppTheme.divider),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Container(
-                            width: 3, height: 14,
-                            decoration: BoxDecoration(
-                              color: AppTheme.primary,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            'CONTEXT & CONSTRAINTS',
-                            style: AppTheme.labelSmall().copyWith(color: AppTheme.primary),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      _buildTextField(
-                        'Paste abstract, keywords, or specific constraints here...',
-                        _requirementsController,
-                        maxLines: 4,
-                        hasAttachment: true,
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          _buildGenerateButton(),
-                          const SizedBox(width: 16),
-                          _buildClearButton(),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                ),
                 ),
 
                 const SizedBox(height: 40),
@@ -761,7 +805,12 @@ class _HomeScreenState extends State<HomeScreen> {
       case _tabTrends:
         return TrendAnalysisScreen(
           papers: _researchPapers,
-          llmTrendInsights: _llmGeneratedContent['trend_analysis'] as Map<String, dynamic>?,
+          llmTrendInsights:
+              _llmGeneratedContent['trend_analysis'] as Map<String, dynamic>?,
+          onPapersChanged: (papers) {
+            setState(() => _researchPapers = papers);
+            _saveResearchPapers();
+          },
         );
       case _tabMain:
       default:
@@ -782,14 +831,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Breadcrumb
                 Row(
                   children: [
-                    Text('Omicron', style: GoogleFonts.interTight(
-                      fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w500)),
+                    Text('Omicron',
+                        style: GoogleFonts.interTight(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                            fontWeight: FontWeight.w500)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Icon(Icons.chevron_right, size: 14, color: AppTheme.textTertiary),
+                      child: Icon(Icons.chevron_right,
+                          size: 14, color: AppTheme.textTertiary),
                     ),
-                    Text('Search', style: GoogleFonts.interTight(
-                      fontSize: 12, color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
+                    Text('Search',
+                        style: GoogleFonts.interTight(
+                            fontSize: 12,
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.w600)),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -864,152 +920,204 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                     child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: AppTheme.glassSurface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.glassBorder),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 24,
-                        offset: const Offset(0, 6),
-                        spreadRadius: -4,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _isPatentSearch ? 'PATENT SEARCH' : 'RELATED PAPER SEARCH',
-                        style: GoogleFonts.interTight(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primary,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _searchController,
-                              textInputAction: TextInputAction.search,
-                              onSubmitted: (_) => _runPaperSearch(),
-                              decoration: InputDecoration(
-                                hintText: _isPatentSearch
-                                    ? 'Describe the patent you\'re looking for...'
-                                    : 'Describe what you\'re researching...',
-                                prefixIcon: const Icon(Icons.search_rounded),
-                               filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      const BorderSide(color: AppTheme.border),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      const BorderSide(color: AppTheme.border),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      const BorderSide(color: AppTheme.primary),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          ElevatedButton(
-                            onPressed: _isSearching ? null : _runPaperSearch,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 18, vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            child: _isSearching
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                        color: Colors.white, strokeWidth: 2),
-                                  )
-                                : Text(
-                                    'Search',
-                                    style: GoogleFonts.interTight(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppTheme.glassSurface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppTheme.glassBorder),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 24,
+                            offset: const Offset(0, 6),
+                            spreadRadius: -4,
                           ),
                         ],
                       ),
-                      if (_isPatentSearch) ...[  
-                        const SizedBox(height: 14),
-                        Text(
-                          'PATENT OFFICES',
-                          style: GoogleFonts.interTight(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.textTertiary,
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            _buildPatentOfficeChip(
-                              label: 'USPTO (US)',
-                              icon: Icons.flag_rounded,
-                              isSelected: _searchUSPatents,
-                              onTap: () {
-                                setState(() {
-                                  _searchUSPatents = !_searchUSPatents;
-                                  if (!_searchUSPatents && !_searchINPatents) {
-                                    _searchINPatents = true;
-                                  }
-                                });
-                              },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _isPatentSearch
+                                ? 'PATENT SEARCH'
+                                : 'RELATED PAPER SEARCH',
+                            style: GoogleFonts.interTight(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primary,
+                              letterSpacing: 1.0,
                             ),
-                            const SizedBox(width: 10),
-                            _buildPatentOfficeChip(
-                              label: 'IPO (India)',
-                              icon: Icons.flag_circle_rounded,
-                              isSelected: _searchINPatents,
-                              onTap: () {
-                                setState(() {
-                                  _searchINPatents = !_searchINPatents;
-                                  if (!_searchINPatents && !_searchUSPatents) {
-                                    _searchUSPatents = true;
-                                  }
-                                });
-                              },
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _searchController,
+                                  textInputAction: TextInputAction.search,
+                                  onSubmitted: (_) => _runPaperSearch(),
+                                  decoration: InputDecoration(
+                                    hintText: _isPatentSearch
+                                        ? 'Describe the patent you\'re looking for...'
+                                        : 'Describe what you\'re researching...',
+                                    prefixIcon:
+                                        const Icon(Icons.search_rounded),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                          color: AppTheme.border),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                          color: AppTheme.border),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                          color: AppTheme.primary),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              ElevatedButton(
+                                onPressed:
+                                    _isSearching ? null : _runPaperSearch,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 18, vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: _isSearching
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2),
+                                      )
+                                    : Text(
+                                        'Search',
+                                        style: GoogleFonts.interTight(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                              ),
+                            ],
+                          ),
+                          if (!_isPatentSearch) ...[
+                            const SizedBox(height: 14),
+                            Text(
+                              'SEARCH SOURCES',
+                              style: GoogleFonts.interTight(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.textTertiary,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 10,
+                              runSpacing: 10,
+                              children: [
+                                _buildPatentOfficeChip(
+                                  label: 'Academic DBs',
+                                  icon: Icons.library_books_rounded,
+                                  isSelected: _searchAcademicDBs,
+                                  onTap: () {
+                                    setState(() {
+                                      _searchAcademicDBs = !_searchAcademicDBs;
+                                      if (!_searchAcademicDBs && !_searchGoogleScholar) {
+                                        _searchGoogleScholar = true;
+                                      }
+                                    });
+                                  },
+                                ),
+                                _buildPatentOfficeChip(
+                                  label: 'Google Scholar',
+                                  icon: Icons.school_rounded,
+                                  isSelected: _searchGoogleScholar,
+                                  onTap: () {
+                                    setState(() {
+                                      _searchGoogleScholar = !_searchGoogleScholar;
+                                      if (!_searchAcademicDBs && !_searchGoogleScholar) {
+                                        _searchAcademicDBs = true;
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                      ],
-                      if (_searchError.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _searchError,
-                          style: GoogleFonts.interTight(
-                            fontSize: 12,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                      ],
-                    ],
+                          if (_isPatentSearch) ...[
+                            const SizedBox(height: 14),
+                            Text(
+                              'PATENT OFFICES',
+                              style: GoogleFonts.interTight(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.textTertiary,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                _buildPatentOfficeChip(
+                                  label: 'USPTO (US)',
+                                  icon: Icons.flag_rounded,
+                                  isSelected: _searchUSPatents,
+                                  onTap: () {
+                                    setState(() {
+                                      _searchUSPatents = !_searchUSPatents;
+                                      if (!_searchUSPatents &&
+                                          !_searchINPatents) {
+                                        _searchINPatents = true;
+                                      }
+                                    });
+                                  },
+                                ),
+                                const SizedBox(width: 10),
+                                _buildPatentOfficeChip(
+                                  label: 'IPO (India)',
+                                  icon: Icons.flag_circle_rounded,
+                                  isSelected: _searchINPatents,
+                                  onTap: () {
+                                    setState(() {
+                                      _searchINPatents = !_searchINPatents;
+                                      if (!_searchINPatents &&
+                                          !_searchUSPatents) {
+                                        _searchUSPatents = true;
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                          if (_searchError.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              _searchError,
+                              style: GoogleFonts.interTight(
+                                fontSize: 12,
+                                color: AppTheme.primary,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-                ),
                 ),
                 const SizedBox(height: 24),
                 _buildSearchResults(),
@@ -1034,14 +1142,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Breadcrumb
                 Row(
                   children: [
-                    Text('Omicron', style: GoogleFonts.interTight(
-                      fontSize: 12, color: AppTheme.textSecondary, fontWeight: FontWeight.w500)),
+                    Text('Omicron',
+                        style: GoogleFonts.interTight(
+                            fontSize: 12,
+                            color: AppTheme.textSecondary,
+                            fontWeight: FontWeight.w500)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Icon(Icons.chevron_right, size: 14, color: AppTheme.textTertiary),
+                      child: Icon(Icons.chevron_right,
+                          size: 14, color: AppTheme.textTertiary),
                     ),
-                    Text('History', style: GoogleFonts.interTight(
-                      fontSize: 12, color: AppTheme.textPrimary, fontWeight: FontWeight.w600)),
+                    Text('History',
+                        style: GoogleFonts.interTight(
+                            fontSize: 12,
+                            color: AppTheme.textPrimary,
+                            fontWeight: FontWeight.w600)),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -1113,61 +1228,62 @@ class _HomeScreenState extends State<HomeScreen> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
         child: Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppTheme.glassSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.glassBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 6),
-            spreadRadius: -4,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title.toUpperCase(),
-            style: AppTheme.labelSmall(),
-          ),
-          const SizedBox(height: 12),
-          if (items.isEmpty)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 48),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: AppTheme.background,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(Icons.history_rounded,
-                          size: 32, color: AppTheme.textTertiary),
-                    ),
-                    const SizedBox(height: 16),
-                    Text('No History Yet', style: AppTheme.titleMedium()),
-                    const SizedBox(height: 8),
-                    Text('Your research searches and generations\nwill appear here.',
-                      textAlign: TextAlign.center,
-                      style: AppTheme.bodyMedium()),
-                  ],
-                ),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppTheme.glassSurface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.glassBorder),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 24,
+                offset: const Offset(0, 6),
+                spreadRadius: -4,
               ),
-            )
-          else
-            Column(
-              children: items.map(_buildHistoryItem).toList(),
-            ),
-        ],
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title.toUpperCase(),
+                style: AppTheme.labelSmall(),
+              ),
+              const SizedBox(height: 12),
+              if (items.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 48),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppTheme.background,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.history_rounded,
+                              size: 32, color: AppTheme.textTertiary),
+                        ),
+                        const SizedBox(height: 16),
+                        Text('No History Yet', style: AppTheme.titleMedium()),
+                        const SizedBox(height: 8),
+                        Text(
+                            'Your research searches and generations\nwill appear here.',
+                            textAlign: TextAlign.center,
+                            style: AppTheme.bodyMedium()),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: items.map(_buildHistoryItem).toList(),
+                ),
+            ],
+          ),
+        ),
       ),
-    ),
-    ),
     );
   }
 
@@ -1237,200 +1353,236 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSearchResults() {
-    final currentResults = _isPatentSearch ? _patentSearchResults : _paperSearchResults;
+    final currentResults =
+        _isPatentSearch ? _patentSearchResults : _paperSearchResults;
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
         child: Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppTheme.glassSurface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.glassBorder),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 6),
-            spreadRadius: -4,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                'RESULTS',
-                style: AppTheme.labelSmall(),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppTheme.glassSurface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.glassBorder),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 24,
+                offset: const Offset(0, 6),
+                spreadRadius: -4,
               ),
-              if (currentResults.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primarySubtle,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '${currentResults.length}',
-                    style: GoogleFonts.interTight(
-                      fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.primary),
-                  ),
-                ),
-                const Spacer(),
-                if (!_isPatentSearch && _paperSearchResults.isNotEmpty)
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      _importSearchResultsToDatabase(_paperSearchResults, topic: _searchController.text.trim());
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Imported ${_paperSearchResults.length} papers to database'),
-                          backgroundColor: AppTheme.success,
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.download_rounded, size: 16),
-                    label: Text('Import to Database',
-                        style: GoogleFonts.interTight(
-                            fontSize: 12, fontWeight: FontWeight.w600)),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.primary,
-                      side: BorderSide(color: AppTheme.primary.withOpacity(0.4)),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-              ],
             ],
           ),
-          const SizedBox(height: 12),
-          // LLM Optimized Query Banner
-          if (_llmOptimizedQuery.isNotEmpty) ...[  
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppTheme.infoLight,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.info.withOpacity(0.3)),
-              ),
-              child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Icon(Icons.auto_awesome_rounded, size: 16, color: AppTheme.info),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'LLM optimized: ',
-                            style: GoogleFonts.interTight(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.info,
-                            ),
-                          ),
-                          TextSpan(
-                            text: _llmOptimizedQuery,
-                            style: GoogleFonts.interTight(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: AppTheme.info,
-                            ),
-                          ),
-                        ],
+                  Text(
+                    'RESULTS',
+                    style: AppTheme.labelSmall(),
+                  ),
+                  if (currentResults.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primarySubtle,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        '${currentResults.length}',
+                        style: GoogleFonts.interTight(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.primary),
                       ),
                     ),
-                  ),
+                    const Spacer(),
+                    if (!_isPatentSearch && _paperSearchResults.isNotEmpty)
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          _importSearchResultsToDatabase(_paperSearchResults,
+                              topic: _searchController.text.trim());
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Imported ${_paperSearchResults.length} papers to database'),
+                              backgroundColor: AppTheme.success,
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.download_rounded, size: 16),
+                        label: Text('Import to Database',
+                            style: GoogleFonts.interTight(
+                                fontSize: 12, fontWeight: FontWeight.w600)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.primary,
+                          side: BorderSide(
+                              color: AppTheme.primary.withOpacity(0.4)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8)),
+                        ),
+                      ),
+                  ],
                 ],
               ),
-            ),
-          ],
-          if (_isSearching)
-            Column(
-              children: List.generate(4, (index) => Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.surfaceHover,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.border),
-                ),
-                child: Row(
-                  children: [
-                    Container(width: 36, height: 36,
-                      decoration: BoxDecoration(
-                        color: AppTheme.shimmerBase,
-                        borderRadius: BorderRadius.circular(8),
-                      )),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(height: 12, width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: AppTheme.shimmerBase,
-                              borderRadius: BorderRadius.circular(4))),
-                          const SizedBox(height: 8),
-                          Container(height: 10, width: 150,
-                            decoration: BoxDecoration(
-                              color: AppTheme.shimmerHighlight,
-                              borderRadius: BorderRadius.circular(4))),
-                        ],
+              const SizedBox(height: 12),
+              // LLM Optimized Query Banner
+              if (_llmOptimizedQuery.isNotEmpty) ...[
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppTheme.infoLight,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppTheme.info.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.auto_awesome_rounded,
+                          size: 16, color: AppTheme.info),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'LLM optimized: ',
+                                style: GoogleFonts.interTight(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.info,
+                                ),
+                              ),
+                              TextSpan(
+                                text: _llmOptimizedQuery,
+                                style: GoogleFonts.interTight(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.info,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              )),
-            )
-          else if (currentResults.isEmpty)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32),
-                child: Column(
-                  children: [
-                    Icon(
-                      _isPatentSearch ? Icons.verified_outlined : Icons.search_rounded,
-                      size: 32, color: AppTheme.textTertiary),
-                    const SizedBox(height: 12),
-                    Text(
-                      _isPatentSearch
-                          ? 'Run a search to see patents here.'
-                          : 'Run a search to see results here.',
-                      style: AppTheme.bodyMedium(),
+              ],
+              if (_isSearching)
+                Column(
+                  children: List.generate(
+                      4,
+                      (index) => Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: AppTheme.surfaceHover,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppTheme.border),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.shimmerBase,
+                                      borderRadius: BorderRadius.circular(8),
+                                    )),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                          height: 12,
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                              color: AppTheme.shimmerBase,
+                                              borderRadius:
+                                                  BorderRadius.circular(4))),
+                                      const SizedBox(height: 8),
+                                      Container(
+                                          height: 10,
+                                          width: 150,
+                                          decoration: BoxDecoration(
+                                              color: AppTheme.shimmerHighlight,
+                                              borderRadius:
+                                                  BorderRadius.circular(4))),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )),
+                )
+              else if (currentResults.isEmpty)
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Column(
+                      children: [
+                        Icon(
+                            _isPatentSearch
+                                ? Icons.verified_outlined
+                                : Icons.search_rounded,
+                            size: 32,
+                            color: AppTheme.textTertiary),
+                        const SizedBox(height: 12),
+                        Text(
+                          _isPatentSearch
+                              ? 'Run a search to see patents here.'
+                              : 'Run a search to see results here.',
+                          style: AppTheme.bodyMedium(),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                )
+              else if (_isPatentSearch)
+                Column(
+                  children: _patentSearchResults
+                      .map((patent) => _buildPatentItem(patent))
+                      .toList(),
+                )
+              else
+                Column(
+                  children: _paperSearchResults
+                      .map((paper) => _buildPaperItem(
+                            paper['citation'] ?? '',
+                            paper['url'] ?? '',
+                            methodology: paper['methodology'],
+                            year: _extractYear(paper['citation'] ?? ''),
+                            onAdd: () {
+                              _importSearchResultsToDatabase([paper],
+                                  topic: _searchController.text.trim());
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Added to Database & Trend Analysis'),
+                                    backgroundColor: AppTheme.success,
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            },
+                          ))
+                      .toList(),
                 ),
-              ),
-            )
-          else if (_isPatentSearch)
-            Column(
-              children: _patentSearchResults
-                  .map((patent) => _buildPatentItem(patent))
-                  .toList(),
-            )
-          else
-            Column(
-              children: _paperSearchResults
-                  .map((paper) => _buildPaperItem(
-                        paper['citation'] ?? '',
-                        paper['url'] ?? '',
-                        methodology: paper['methodology'],
-                        year: _extractYear(paper['citation'] ?? ''),
-                      ))
-                  .toList(),
-            ),
-        ],
+            ],
+          ),
+        ),
       ),
-    ),
-    ),
     );
   }
 
@@ -1503,7 +1655,8 @@ class _HomeScreenState extends State<HomeScreen> {
         });
         await _addHistoryEntry(
           topic: query,
-          details: 'Patent search${_llmOptimizedQuery.isNotEmpty ? " (LLM: $_llmOptimizedQuery)" : ""}',
+          details:
+              'Patent search${_llmOptimizedQuery.isNotEmpty ? " (LLM: $_llmOptimizedQuery)" : ""}',
         );
       } else {
         final results = await _fetchRealPapers(optimizedQuery);
@@ -1514,7 +1667,8 @@ class _HomeScreenState extends State<HomeScreen> {
         _importSearchResultsToDatabase(results, topic: query);
         await _addHistoryEntry(
           topic: query,
-          details: 'Related papers search${_llmOptimizedQuery.isNotEmpty ? " (LLM: $_llmOptimizedQuery)" : ""}',
+          details:
+              'Related papers search${_llmOptimizedQuery.isNotEmpty ? " (LLM: $_llmOptimizedQuery)" : ""}',
         );
       }
     } catch (e) {
@@ -1552,21 +1706,23 @@ Return valid JSON with this exact structure:
 {"optimized_query": "your optimized search keywords here"}
 ''';
 
-    final response = await http.post(
-      Uri.parse('$_ollamaIp/api/generate'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'model': _selectedModel,
-        'prompt': prompt,
-        'stream': false,
-        'format': 'json',
-        'options': {
-          'temperature': 0.3,
-          'top_p': 0.9,
-          'num_predict': 256,
-        }
-      }),
-    ).timeout(const Duration(seconds: 30));
+    final response = await http
+        .post(
+          Uri.parse('$_ollamaIp/api/generate'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'model': _selectedModel,
+            'prompt': prompt,
+            'stream': false,
+            'format': 'json',
+            'options': {
+              'temperature': 0.3,
+              'top_p': 0.9,
+              'num_predict': 256,
+            }
+          }),
+        )
+        .timeout(const Duration(seconds: 30));
 
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
@@ -1587,7 +1743,8 @@ Return valid JSON with this exact structure:
         final parsed = jsonDecode(cleaned);
         final optimized = parsed['optimized_query']?.toString() ?? '';
         if (optimized.isNotEmpty) {
-          print('DEBUG: LLM optimized query: "$userDescription" -> "$optimized"');
+          print(
+              'DEBUG: LLM optimized query: "$userDescription" -> "$optimized"');
           return optimized;
         }
       } catch (e) {
@@ -1606,7 +1763,8 @@ Return valid JSON with this exact structure:
       width: _isRelatedPanelCollapsed ? 48 : 320,
       decoration: BoxDecoration(
         color: AppTheme.glassSurface,
-        border: const Border(left: BorderSide(color: AppTheme.glassBorder, width: 1)),
+        border: const Border(
+            left: BorderSide(color: AppTheme.glassBorder, width: 1)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -1624,149 +1782,172 @@ Return valid JSON with this exact structure:
                   icon: const Icon(Icons.chevron_left_rounded, size: 20),
                   color: AppTheme.textSecondary,
                   tooltip: 'Expand panel',
-                  onPressed: () => setState(() => _isRelatedPanelCollapsed = false),
+                  onPressed: () =>
+                      setState(() => _isRelatedPanelCollapsed = false),
                 ),
               ],
             )
           : Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Row(
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Related Literature',
-                            style: AppTheme.headlineMedium(),
-                          ),
-                          if (_paperDetails.isNotEmpty) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primarySubtle,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '${_paperDetails.length}',
-                                style: GoogleFonts.interTight(
-                                  fontSize: 12, fontWeight: FontWeight.w700, color: AppTheme.primary),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Citations & Academic Papers',
-                        style: AppTheme.caption(),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right_rounded, size: 20),
-                  color: AppTheme.textSecondary,
-                  tooltip: 'Collapse panel',
-                  onPressed: () => setState(() => _isRelatedPanelCollapsed = true),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1, color: AppTheme.border),
-          Expanded(
-            child: _isLoading && _relatedPapers.isEmpty
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppTheme.primary))
-                : _relatedPapers.isEmpty
-                    ? Center(
+                      Expanded(
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: AppTheme.background,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Icon(Icons.library_books_outlined,
-                                  size: 32,
-                                  color: AppTheme.textTertiary),
+                            Row(
+                              children: [
+                                Text(
+                                  'Related Literature',
+                                  style: AppTheme.headlineMedium(),
+                                ),
+                                if (_paperDetails.isNotEmpty) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primarySubtle,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      '${_paperDetails.length}',
+                                      style: GoogleFonts.interTight(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppTheme.primary),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 4),
                             Text(
-                              'No Papers Found Yet',
-                              style: AppTheme.titleMedium(),
-                            ),
-                            const SizedBox(height: 8),
-                            SizedBox(
-                              width: 200,
-                              child: Text(
-                                'Start a generation to see relevant academic papers and citations appear here.',
-                                textAlign: TextAlign.center,
-                                style: AppTheme.bodyMedium(),
-                              ),
+                              'Citations & Academic Papers',
+                              style: AppTheme.caption(),
                             ),
                           ],
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(20),
-                        itemCount: _paperDetails.length,
-                        itemBuilder: (context, index) {
-                          final paper = _paperDetails[index];
-                          return _buildPaperItem(
-                            paper['citation'] ?? '',
-                            paper['url'] ?? '',
-                            methodology: paper['methodology'],
-                            year: _extractYear(paper['citation'] ?? ''),
-                          );
-                        },
                       ),
-          ),
-          const Divider(height: 1, color: AppTheme.border),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: AppTheme.primary,
-                    shape: BoxShape.circle,
+                      IconButton(
+                        icon: const Icon(Icons.chevron_right_rounded, size: 20),
+                        color: AppTheme.textSecondary,
+                        tooltip: 'Collapse panel',
+                        onPressed: () =>
+                            setState(() => _isRelatedPanelCollapsed = true),
+                      ),
+                    ],
                   ),
-                  child: const Text('AI',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold)),
                 ),
-                const SizedBox(width: 12),
+                const Divider(height: 1, color: AppTheme.border),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: _isLoading && _relatedPapers.isEmpty
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                              color: AppTheme.primary))
+                      : _relatedPapers.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.background,
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Icon(Icons.library_books_outlined,
+                                        size: 32, color: AppTheme.textTertiary),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No Papers Found Yet',
+                                    style: AppTheme.titleMedium(),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  SizedBox(
+                                    width: 200,
+                                    child: Text(
+                                      'Start a generation to see relevant academic papers and citations appear here.',
+                                      textAlign: TextAlign.center,
+                                      style: AppTheme.bodyMedium(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.all(20),
+                              itemCount: _paperDetails.length,
+                              itemBuilder: (context, index) {
+                                final paper = _paperDetails[index];
+                                return _buildPaperItem(
+                                  paper['citation'] ?? '',
+                                  paper['url'] ?? '',
+                                  methodology: paper['methodology'],
+                                  year: _extractYear(paper['citation'] ?? ''),
+                                  onAdd: () {
+                                    _importSearchResultsToDatabase([paper],
+                                        topic: _topicController.text.trim());
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Added to Database & Trend Analysis'),
+                                          backgroundColor: AppTheme.success,
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                ),
+                const Divider(height: 1, color: AppTheme.border),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
                     children: [
-                      Text(
-                        _selectedModel ?? 'No Model Selected',
-                        style: GoogleFonts.interTight(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textPrimary,
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: AppTheme.primary,
+                          shape: BoxShape.circle,
                         ),
-                        overflow: TextOverflow.ellipsis,
+                        child: const Text('AI',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold)),
                       ),
-                      Text(
-                        _selectedModel != null ? 'Connected' : 'Disconnected',
-                        style: GoogleFonts.interTight(
-                          fontSize: 10,
-                          color: _selectedModel != null
-                              ? AppTheme.success
-                              : AppTheme.textSecondary,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _selectedModel ?? 'No Model Selected',
+                              style: GoogleFonts.interTight(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textPrimary,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              _selectedModel != null
+                                  ? 'Connected'
+                                  : 'Disconnected',
+                              style: GoogleFonts.interTight(
+                                fontSize: 10,
+                                color: _selectedModel != null
+                                    ? AppTheme.success
+                                    : AppTheme.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -1774,9 +1955,6 @@ Return valid JSON with this exact structure:
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -1794,15 +1972,19 @@ Return valid JSON with this exact structure:
               color: isFocused ? Colors.white : AppTheme.surfaceHover,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isFocused ? AppTheme.primary.withOpacity(0.5) : AppTheme.border,
+                color: isFocused
+                    ? AppTheme.primary.withOpacity(0.5)
+                    : AppTheme.border,
                 width: isFocused ? 1.5 : 1.0,
               ),
               boxShadow: isFocused
-                  ? [BoxShadow(
-                      color: AppTheme.primary.withOpacity(0.06),
-                      blurRadius: 0,
-                      spreadRadius: 3,
-                    )]
+                  ? [
+                      BoxShadow(
+                        color: AppTheme.primary.withOpacity(0.06),
+                        blurRadius: 0,
+                        spreadRadius: 3,
+                      )
+                    ]
                   : [],
             ),
             child: TextField(
@@ -1848,9 +2030,13 @@ Return valid JSON with this exact structure:
             duration: const Duration(milliseconds: 200),
             height: 380,
             padding: const EdgeInsets.all(24),
-            transform: isHovered ? (Matrix4.identity()..translate(0.0, -2.0)) : Matrix4.identity(),
+            transform: isHovered
+                ? (Matrix4.identity()..translate(0.0, -2.0))
+                : Matrix4.identity(),
             decoration: BoxDecoration(
-              color: isHovered ? AppTheme.glassSurface : AppTheme.glassSurface.withOpacity(0.75),
+              color: isHovered
+                  ? AppTheme.glassSurface
+                  : AppTheme.glassSurface.withOpacity(0.75),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isHovered ? AppTheme.borderFocus : AppTheme.glassBorder,
@@ -1907,7 +2093,8 @@ Return valid JSON with this exact structure:
                                       color: Colors.white, size: 18),
                                   const SizedBox(width: 8),
                                   Text('Copied to clipboard',
-                                      style: GoogleFonts.interTight(fontSize: 13)),
+                                      style:
+                                          GoogleFonts.interTight(fontSize: 13)),
                                 ],
                               ),
                               backgroundColor: AppTheme.success,
@@ -1973,76 +2160,81 @@ Return valid JSON with this exact structure:
           onEnter: (_) => setLocalState(() => isHovered = true),
           onExit: (_) => setLocalState(() => isHovered = false),
           child: AnimatedScale(
-            scale: _isLoading ? 1.0 : isHovered ? 1.02 : 1.0,
+            scale: _isLoading
+                ? 1.0
+                : isHovered
+                    ? 1.02
+                    : 1.0,
             duration: const Duration(milliseconds: 150),
             curve: Curves.easeOut,
             child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primary.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _processRequest,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ).copyWith(
-          backgroundColor: MaterialStateProperty.resolveWith((states) {
-            if (states.contains(MaterialState.disabled)) {
-              return AppTheme.primary.withOpacity(0.5);
-            }
-            return null;
-          }),
-          backgroundBuilder: (context, states, child) {
-            if (states.contains(MaterialState.disabled)) return child!;
-            return Ink(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppTheme.primary, AppTheme.primaryLight],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.all(Radius.circular(12)),
-              ),
-              child: child,
-            );
-          },
-        ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2.5),
-              )
-            : Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.auto_awesome, size: 20),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Generate Review',
-                    style: GoogleFonts.interTight(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primary.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
-      ),
-    ),
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _processRequest,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ).copyWith(
+                  backgroundColor: MaterialStateProperty.resolveWith((states) {
+                    if (states.contains(MaterialState.disabled)) {
+                      return AppTheme.primary.withOpacity(0.5);
+                    }
+                    return null;
+                  }),
+                  backgroundBuilder: (context, states, child) {
+                    if (states.contains(MaterialState.disabled)) return child!;
+                    return Ink(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [AppTheme.primary, AppTheme.primaryLight],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                      child: child,
+                    );
+                  },
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2.5),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.auto_awesome, size: 20),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Generate Review',
+                            style: GoogleFonts.interTight(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
           ),
         );
       },
@@ -2144,8 +2336,10 @@ Return valid JSON with this exact structure:
     final office = patent['office'] ?? '';
 
     final bool isIndian = office == 'IPO';
-    final Color officeColor = isIndian ? const Color(0xFFFF9933) : AppTheme.info;
-    final Color officeBgColor = isIndian ? const Color(0xFFFFF3E0) : AppTheme.infoLight;
+    final Color officeColor =
+        isIndian ? const Color(0xFFFF9933) : AppTheme.info;
+    final Color officeBgColor =
+        isIndian ? const Color(0xFFFFF3E0) : AppTheme.infoLight;
 
     return StatefulBuilder(
       builder: (context, setLocalState) {
@@ -2153,7 +2347,9 @@ Return valid JSON with this exact structure:
         return MouseRegion(
           onEnter: (_) => setLocalState(() => isHovered = true),
           onExit: (_) => setLocalState(() => isHovered = false),
-          cursor: url.isNotEmpty ? SystemMouseCursors.click : SystemMouseCursors.basic,
+          cursor: url.isNotEmpty
+              ? SystemMouseCursors.click
+              : SystemMouseCursors.basic,
           child: GestureDetector(
             onTap: url.isNotEmpty ? () => _launchUrl(url) : null,
             child: AnimatedContainer(
@@ -2201,52 +2397,60 @@ Return valid JSON with this exact structure:
                           children: [
                             if (office.isNotEmpty)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: officeBgColor,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(office,
-                                  style: GoogleFonts.interTight(
-                                    fontSize: 10, fontWeight: FontWeight.w700,
-                                    color: officeColor)),
+                                    style: GoogleFonts.interTight(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: officeColor)),
                               ),
                             if (patentNumber.isNotEmpty)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: AppTheme.warningLight,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(patentNumber,
-                                  style: GoogleFonts.interTight(
-                                    fontSize: 10, fontWeight: FontWeight.w600,
-                                    color: AppTheme.warning)),
+                                    style: GoogleFonts.interTight(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.warning)),
                               ),
                             if (date.isNotEmpty)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: AppTheme.backgroundAlt,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(date,
-                                  style: GoogleFonts.interTight(
-                                    fontSize: 10, fontWeight: FontWeight.w600,
-                                    color: AppTheme.textSecondary)),
+                                    style: GoogleFonts.interTight(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.textSecondary)),
                               ),
                             if (url.isNotEmpty)
                               Text('Click to open',
-                                style: GoogleFonts.interTight(
-                                  fontSize: 10, color: AppTheme.primary,
-                                  fontWeight: FontWeight.w500)),
+                                  style: GoogleFonts.interTight(
+                                      fontSize: 10,
+                                      color: AppTheme.primary,
+                                      fontWeight: FontWeight.w500)),
                           ],
                         ),
                         if (assignee.isNotEmpty) ...[
                           const SizedBox(height: 6),
                           Row(
                             children: [
-                              Icon(Icons.business_rounded, size: 12, color: AppTheme.textTertiary),
+                              Icon(Icons.business_rounded,
+                                  size: 12, color: AppTheme.textTertiary),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
@@ -2346,20 +2550,29 @@ Return valid JSON with this exact structure:
       try {
         // PatentsView API - new endpoint format
         final body = jsonEncode({
-          "q": {"_text_any": {"patent_abstract": query}},
-          "f": ["patent_number", "patent_title", "patent_abstract", "patent_date", "assignee_organization"],
-          "o": {"page": 1, "per_page": 50},
-          "s": [{"patent_date": "desc"}]
+          "q": {
+            "_text_any": {"patent_abstract": query}
+          },
+          "f": [
+            "patent_number",
+            "patent_title",
+            "patent_abstract",
+            "patent_date",
+            "assignee_organization"
+          ],
+          "o": {"page": 1, "per_page": 50}
         });
 
-        final response = await http.post(
-          Uri.parse('https://api.patentsview.org/patents/query'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: body,
-        ).timeout(const Duration(seconds: 20));
+        final response = await http
+            .post(
+              Uri.parse('https://api.patentsview.org/patents/query'),
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              body: body,
+            )
+            .timeout(const Duration(seconds: 20));
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
@@ -2376,7 +2589,8 @@ Return valid JSON with this exact structure:
             String assignee = '';
             final assignees = patent['assignees'] as List?;
             if (assignees != null && assignees.isNotEmpty) {
-              assignee = assignees[0]['assignee_organization']?.toString() ?? '';
+              assignee =
+                  assignees[0]['assignee_organization']?.toString() ?? '';
             }
 
             final patentUrl = patentNumber.isNotEmpty
@@ -2399,7 +2613,8 @@ Return valid JSON with this exact structure:
             });
           }
         }
-        print('DEBUG: Fetched ${allPatents.length} patents from USPTO PatentsView');
+        print(
+            'DEBUG: Fetched ${allPatents.length} patents from USPTO PatentsView');
       } catch (e) {
         print('DEBUG: USPTO PatentsView API error: $e');
       }
@@ -2409,30 +2624,42 @@ Return valid JSON with this exact structure:
         try {
           // Use Google Patents search via SerpAPI-like scraping or direct link
           // We'll use the Lens.org free API as a fallback
-          final lensUrl =
-              'https://api.lens.org/patent/search';
+          final lensUrl = 'https://api.lens.org/patent/search';
           final lensBody = jsonEncode({
             "query": {
               "bool": {
                 "must": [
-                  {"match": {"title": query}},
-                  {"match": {"jurisdiction": "US"}}
+                  {
+                    "match": {"title": query}
+                  },
+                  {
+                    "match": {"jurisdiction": "US"}
+                  }
                 ]
               }
             },
             "size": 30,
-            "sort": [{"date_published": "desc"}],
-            "include": ["lens_id", "title", "abstract", "date_published", "biblio.parties.applicants", "doc_number", "jurisdiction"]
+            "include": [
+              "lens_id",
+              "title",
+              "abstract",
+              "date_published",
+              "biblio.parties.applicants",
+              "doc_number",
+              "jurisdiction"
+            ]
           });
 
-          final lensResponse = await http.post(
-            Uri.parse(lensUrl),
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: lensBody,
-          ).timeout(const Duration(seconds: 15));
+          final lensResponse = await http
+              .post(
+                Uri.parse(lensUrl),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+                body: lensBody,
+              )
+              .timeout(const Duration(seconds: 15));
 
           if (lensResponse.statusCode == 200) {
             final data = jsonDecode(lensResponse.body);
@@ -2448,9 +2675,12 @@ Return valid JSON with this exact structure:
 
               String assignee = '';
               try {
-                final applicants = item['biblio']?['parties']?['applicants'] as List?;
+                final applicants =
+                    item['biblio']?['parties']?['applicants'] as List?;
                 if (applicants != null && applicants.isNotEmpty) {
-                  assignee = applicants[0]['extracted_name']?['value']?.toString() ?? '';
+                  assignee =
+                      applicants[0]['extracted_name']?['value']?.toString() ??
+                          '';
                 }
               } catch (_) {}
 
@@ -2467,12 +2697,15 @@ Return valid JSON with this exact structure:
                 'abstract': shortAbstract,
                 'url': lensId.isNotEmpty
                     ? 'https://www.lens.org/lens/patent/$lensId'
-                    : (docNum.isNotEmpty ? 'https://patents.google.com/patent/US$docNum' : ''),
+                    : (docNum.isNotEmpty
+                        ? 'https://patents.google.com/patent/US$docNum'
+                        : ''),
                 'office': 'USPTO',
               });
             }
           }
-          print('DEBUG: Lens.org fallback for US patents, total: ${allPatents.length}');
+          print(
+              'DEBUG: Lens.org fallback for US patents, total: ${allPatents.length}');
         } catch (e) {
           print('DEBUG: Lens.org API error (non-critical): $e');
         }
@@ -2486,7 +2719,8 @@ Return valid JSON with this exact structure:
           'date': '',
           'assignee': 'Click to search on Google Patents',
           'abstract': 'Direct search on Google Patents with country filter US.',
-          'url': 'https://patents.google.com/?q=$encodedQuery&country=US&oq=$encodedQuery',
+          'url':
+              'https://patents.google.com/?q=$encodedQuery&country=US&oq=$encodedQuery',
           'office': 'USPTO',
         });
         allPatents.add({
@@ -2494,8 +2728,10 @@ Return valid JSON with this exact structure:
           'patent_number': '',
           'date': '',
           'assignee': 'Click to search on USPTO',
-          'abstract': 'Direct search on the United States Patent and Trademark Office.',
-          'url': 'https://ppubs.uspto.gov/pubwebapp/static/pages/searchable/search.html',
+          'abstract':
+              'Direct search on the United States Patent and Trademark Office.',
+          'url':
+              'https://ppubs.uspto.gov/pubwebapp/static/pages/searchable/search.html',
           'office': 'USPTO',
         });
       }
@@ -2517,24 +2753,37 @@ Return valid JSON with this exact structure:
           "query": {
             "bool": {
               "must": [
-                {"match": {"title": query}},
-                {"match": {"jurisdiction": "IN"}}
+                {
+                  "match": {"title": query}
+                },
+                {
+                  "match": {"jurisdiction": "IN"}
+                }
               ]
             }
           },
           "size": 30,
-          "sort": [{"date_published": "desc"}],
-          "include": ["lens_id", "title", "abstract", "date_published", "biblio.parties.applicants", "doc_number", "jurisdiction"]
+          "include": [
+            "lens_id",
+            "title",
+            "abstract",
+            "date_published",
+            "biblio.parties.applicants",
+            "doc_number",
+            "jurisdiction"
+          ]
         });
 
-        final lensResponse = await http.post(
-          Uri.parse(lensUrl),
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-          body: lensBody,
-        ).timeout(const Duration(seconds: 15));
+        final lensResponse = await http
+            .post(
+              Uri.parse(lensUrl),
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              body: lensBody,
+            )
+            .timeout(const Duration(seconds: 15));
 
         if (lensResponse.statusCode == 200) {
           final data = jsonDecode(lensResponse.body);
@@ -2543,7 +2792,8 @@ Return valid JSON with this exact structure:
             final title = item['title']?.toString() ?? '';
             if (title.isEmpty) continue;
 
-            if (allPatents.any((p) => p['title']?.toLowerCase() == title.toLowerCase())) {
+            if (allPatents
+                .any((p) => p['title']?.toLowerCase() == title.toLowerCase())) {
               continue;
             }
 
@@ -2554,9 +2804,11 @@ Return valid JSON with this exact structure:
 
             String assignee = '';
             try {
-              final applicants = item['biblio']?['parties']?['applicants'] as List?;
+              final applicants =
+                  item['biblio']?['parties']?['applicants'] as List?;
               if (applicants != null && applicants.isNotEmpty) {
-                assignee = applicants[0]['extracted_name']?['value']?.toString() ?? '';
+                assignee =
+                    applicants[0]['extracted_name']?['value']?.toString() ?? '';
               }
             } catch (_) {}
 
@@ -2573,7 +2825,9 @@ Return valid JSON with this exact structure:
               'abstract': shortAbstract,
               'url': lensId.isNotEmpty
                   ? 'https://www.lens.org/lens/patent/$lensId'
-                  : (docNum.isNotEmpty ? 'https://patents.google.com/patent/IN$docNum' : googlePatentsINUrl),
+                  : (docNum.isNotEmpty
+                      ? 'https://patents.google.com/patent/IN$docNum'
+                      : googlePatentsINUrl),
               'office': 'IPO',
             });
           }
@@ -2591,7 +2845,8 @@ Return valid JSON with this exact structure:
           'date': '',
           'assignee': 'Click to search on Google Patents (India)',
           'abstract': 'Search Google Patents filtered to Indian jurisdiction.',
-          'url': 'https://patents.google.com/?q=$encodedQuery&country=IN&oq=$encodedQuery',
+          'url':
+              'https://patents.google.com/?q=$encodedQuery&country=IN&oq=$encodedQuery',
           'office': 'IPO',
         });
         allPatents.add({
@@ -2599,36 +2854,55 @@ Return valid JSON with this exact structure:
           'patent_number': '',
           'date': '',
           'assignee': 'Click to search on IPIndia',
-          'abstract': 'Direct search on the Indian Patent Office (Controller General of Patents).',
-          'url': 'https://iprsearch.ipindia.gov.in/PublicSearch/PublicSearchPatent/PatentSearch',
+          'abstract':
+              'Direct search on the Indian Patent Office (Controller General of Patents).',
+          'url':
+              'https://iprsearch.ipindia.gov.in/PublicSearch/PublicSearchPatent/PatentSearch',
           'office': 'IPO',
         });
       }
     }
 
-    // Sort by date descending (newest first)
-    allPatents.sort((a, b) {
-      final dateA = a['date'] ?? '';
-      final dateB = b['date'] ?? '';
-      return dateB.compareTo(dateA);
-    });
+    // Note: Removed local date-based sorting to preserve the true relevance ranking
+    // returned natively by the PatentsView and Lens APIs.
 
     return allPatents;
   }
 
   String? _extractYear(String citation) {
     final match = RegExp(r'\((\d{4})\)').firstMatch(citation);
-    return match?.group(1);
+    final year = match?.group(1);
+    if (year != null) {
+      int? y = int.tryParse(year);
+      if (y != null) {
+        if (y > DateTime.now().year + 1 && y < 2200) y -= 100;
+        if (y >= 1900 && y <= DateTime.now().year + 1) return y.toString();
+      }
+    }
+    // Fallback: find a bare 4-digit year (1900–2099)
+    final bare = RegExp(r'\b((?:19|20|21)\d{2})\b').firstMatch(citation);
+    final bareYear = bare?.group(1);
+    if (bareYear != null) {
+      int? by = int.tryParse(bareYear);
+      if (by != null) {
+        if (by > DateTime.now().year + 1 && by < 2200) by -= 100;
+        if (by >= 1900 && by <= DateTime.now().year + 1) return by.toString();
+      }
+    }
+    return null;
   }
 
-  Widget _buildPaperItem(String title, String url, {String? methodology, String? year}) {
+  Widget _buildPaperItem(String title, String url,
+      {String? methodology, String? year, VoidCallback? onAdd}) {
     return StatefulBuilder(
       builder: (context, setLocalState) {
         bool isHovered = false;
         return MouseRegion(
           onEnter: (_) => setLocalState(() => isHovered = true),
           onExit: (_) => setLocalState(() => isHovered = false),
-          cursor: url.isNotEmpty ? SystemMouseCursors.click : SystemMouseCursors.basic,
+          cursor: url.isNotEmpty
+              ? SystemMouseCursors.click
+              : SystemMouseCursors.basic,
           child: GestureDetector(
             onTap: url.isNotEmpty ? () => _launchUrl(url) : null,
             child: AnimatedContainer(
@@ -2686,39 +2960,54 @@ Return valid JSON with this exact structure:
                           children: [
                             if (methodology != null && methodology.isNotEmpty)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: AppTheme.infoLight,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(methodology,
-                                  style: GoogleFonts.interTight(
-                                    fontSize: 10, fontWeight: FontWeight.w600,
-                                    color: AppTheme.info)),
+                                    style: GoogleFonts.interTight(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.info)),
                               ),
-                            if (year != null && year.isNotEmpty && year != 'n.d.')
+                            if (year != null &&
+                                year.isNotEmpty &&
+                                year != 'n.d.')
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: AppTheme.backgroundAlt,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(year,
-                                  style: GoogleFonts.interTight(
-                                    fontSize: 10, fontWeight: FontWeight.w600,
-                                    color: AppTheme.textSecondary)),
+                                    style: GoogleFonts.interTight(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.textSecondary)),
                               ),
                             if (url.isNotEmpty)
                               Text('Click to open',
-                                style: GoogleFonts.interTight(
-                                  fontSize: 10, color: AppTheme.primary,
-                                  fontWeight: FontWeight.w500)),
+                                  style: GoogleFonts.interTight(
+                                      fontSize: 10,
+                                      color: AppTheme.primary,
+                                      fontWeight: FontWeight.w500)),
                           ],
                         ),
                       ],
                     ),
                   ),
-                  if (url.isNotEmpty)
+                  if (onAdd != null) ...[
+                    const Spacer(),
+                    IconButton(
+                        icon: const Icon(Icons.add_circle_outline, color: AppTheme.primary),
+                        onPressed: onAdd,
+                        tooltip: 'Add to Database & Trend Analysis',
+                    ),
+                  ],
+                  if (url.isNotEmpty && onAdd == null)
                     Padding(
                       padding: const EdgeInsets.only(left: 8, top: 2),
                       child: Icon(Icons.open_in_new_rounded,
@@ -2771,8 +3060,8 @@ Return valid JSON with this exact structure:
       if (decoded is List) {
         _workHistory = decoded
             .whereType<Map>()
-            .map((entry) => entry.map(
-                (key, value) => MapEntry(key.toString(), value)))
+            .map((entry) =>
+                entry.map((key, value) => MapEntry(key.toString(), value)))
             .toList();
       }
     } catch (_) {
@@ -2834,12 +3123,13 @@ Return valid JSON with this exact structure:
   }
 
   /// Import search results into the research database
-  void _importSearchResultsToDatabase(List<Map<String, String>> results, {String? topic}) {
+  void _importSearchResultsToDatabase(List<Map<String, String>> results,
+      {String? topic}) {
     for (final r in results) {
       final paper = ResearchPaper.fromSearchResult(r, topic: topic);
       // Avoid duplicates by title
-      if (!_researchPapers.any(
-          (p) => p.title.toLowerCase() == paper.title.toLowerCase())) {
+      if (!_researchPapers
+          .any((p) => p.title.toLowerCase() == paper.title.toLowerCase())) {
         _researchPapers.add(paper);
       }
     }
@@ -2859,12 +3149,14 @@ Return valid JSON with this exact structure:
       _errorMessage = '';
       _summary =
           'Generating comprehensive research document... This may take several minutes depending on your LLM model.';
-      _findings = 'Analyzing topic and generating detailed content with real facts and data...';
+      _findings =
+          'Analyzing topic and generating detailed content with real facts and data...';
       _relatedPapers = [];
     });
 
     try {
-      final prompt = '''You are a subject-matter expert on "${_topicController.text}". Write an in-depth research analysis document that EXPLAINS and TEACHES this topic thoroughly.
+      final prompt =
+          '''You are a subject-matter expert on "${_topicController.text}". Write an in-depth research analysis document that EXPLAINS and TEACHES this topic thoroughly.
 ${_requirementsController.text.isNotEmpty ? 'Additional requirements: ${_requirementsController.text}' : ''}
 
 CRITICAL INSTRUCTIONS:
@@ -2999,6 +3291,8 @@ RULES:
                 'url': url,
                 'methodology': methodology,
                 'key_outcome': keyOutcome,
+                'keywords': paper['keywords'] ?? '',
+                'country': paper['country'] ?? '',
               });
             }
           }
@@ -3036,7 +3330,8 @@ RULES:
 
       // Auto-import papers from literature review to database grouped by topic
       if (_paperDetails.isNotEmpty) {
-        _importSearchResultsToDatabase(_paperDetails, topic: _topicController.text.trim());
+        _importSearchResultsToDatabase(_paperDetails,
+            topic: _topicController.text.trim());
       }
 
       await _generatePdf();
@@ -3111,8 +3406,9 @@ RULES:
   Future<List<Map<String, String>>> _fetchRealPapers(String topic) async {
     List<Map<String, String>> allPapers = [];
 
-    try {
-      // OpenAlex API - free, no authentication required
+    if (_searchAcademicDBs) {
+      try {
+        // OpenAlex API - free, no authentication required
       // Fetch papers sorted by publication date (newest first)
       final encodedTopic = Uri.encodeComponent(topic);
 
@@ -3120,7 +3416,7 @@ RULES:
       int perPage = 50;
 
       final openAlexUrl =
-          'https://api.openalex.org/works?search=$encodedTopic&sort=publication_date:desc&per_page=$perPage&page=1&mailto=omicron@research.app';
+          'https://api.openalex.org/works?search=$encodedTopic&per_page=$perPage&page=1&mailto=omicron@research.app';
 
       final response = await http.get(
         Uri.parse(openAlexUrl),
@@ -3140,19 +3436,32 @@ RULES:
           final authorships = work['authorships'] as List? ?? [];
           for (var authorship in authorships.take(3)) {
             final author = authorship['author'];
-            if (author != null && author['display_name'] != null) {
-              authorNames.add(author['display_name'].toString());
+            String? name;
+            if (author != null) {
+              name = author['display_name']?.toString();
+            }
+            name ??= authorship['raw_author_name']?.toString();
+            if (name != null && name.isNotEmpty) {
+              authorNames.add(name);
             }
           }
-          if (authorships.length > 3) {
+          if (authorships.length > 3 && authorNames.isNotEmpty) {
             authorNames.add('et al.');
           }
-          final authors = authorNames.isNotEmpty
-              ? authorNames.join(', ')
-              : 'Unknown Author';
 
-          // Get year
-          final year = work['publication_year']?.toString() ?? 'n.d.';
+          // Get year (validate: must be between 1900 and current year + 1)
+          final rawYear = work['publication_year'];
+          String year = 'n.d.';
+          if (rawYear != null) {
+            int? y =
+                rawYear is int ? rawYear : int.tryParse(rawYear.toString());
+            if (y != null) {
+              if (y > DateTime.now().year + 1 && y < 2200) y -= 100;
+              if (y >= 1900 && y <= DateTime.now().year + 1) {
+                year = y.toString();
+              }
+            }
+          }
 
           // Get journal/venue
           String venue = 'Unknown Source';
@@ -3175,6 +3484,13 @@ RULES:
                 primaryLocation['landing_page_url']?.toString();
             final pdfUrl = primaryLocation['pdf_url']?.toString();
             url = pdfUrl ?? landingPageUrl ?? '';
+          }
+
+          String authors = 'Institutional Author';
+          if (authorNames.isNotEmpty) {
+            authors = authorNames.join(', ');
+          } else if (venue != 'Unknown Source') {
+            authors = '$venue (Publisher)';
           }
 
           // Fallback to OpenAlex URL
@@ -3249,11 +3565,37 @@ RULES:
             }
           }
 
+          // Get keywords
+          List<String> keywords = [];
+          final concepts = work['concepts'] as List? ?? [];
+          for (var concept in concepts.take(5)) {
+            final name = concept['display_name']?.toString();
+            if (name != null) keywords.add(name);
+          }
+          final keywordStr = keywords.join(', ');
+
+          // Get country
+          String country = '';
+          final authorshipsList = work['authorships'] as List? ?? [];
+          for (var authorship in authorshipsList) {
+            final institutions = authorship['institutions'] as List? ?? [];
+            for (var inst in institutions) {
+              final cCode = inst['country_code']?.toString() ?? '';
+              if (cCode.isNotEmpty) {
+                country = cCode; // Or map it to full name. Let's just grab the first one.
+                break;
+              }
+            }
+            if (country.isNotEmpty) break;
+          }
+
           allPapers.add({
             'citation': citation,
             'url': url,
             'methodology': methodology,
             'key_outcome': keyOutcome,
+            'keywords': keywordStr,
+            'country': country,
           });
         }
       }
@@ -3266,10 +3608,11 @@ RULES:
     // Request more from Crossref if OpenAlex returned fewer than 40
     {
       try {
-        final int crossrefRows = allPapers.length < 40 ? (40 - allPapers.length + 10) : 15;
+        final int crossrefRows =
+            allPapers.length < 40 ? (40 - allPapers.length + 10) : 15;
         final encodedTopic = Uri.encodeComponent(topic);
         final crossrefUrl =
-            'https://api.crossref.org/works?query=$encodedTopic&rows=$crossrefRows&sort=published&order=desc';
+            'https://api.crossref.org/works?query=$encodedTopic&rows=$crossrefRows';
 
         final response = await http.get(
           Uri.parse(crossrefUrl),
@@ -3291,20 +3634,21 @@ RULES:
 
             // Get authors
             List<String> authorNames = [];
-            final authors = item['author'] as List? ?? [];
+            final authors = item['author'] as List? ?? item['editor'] as List? ?? [];
             for (var author in authors.take(3)) {
               final given = author['given']?.toString() ?? '';
               final family = author['family']?.toString() ?? '';
-              if (family.isNotEmpty) {
+              final name = author['name']?.toString() ?? '';
+              
+              if (family.isNotEmpty || given.isNotEmpty) {
                 authorNames.add(given.isNotEmpty ? '$given $family' : family);
+              } else if (name.isNotEmpty) {
+                authorNames.add(name);
               }
             }
-            if (authors.length > 3) {
+            if (authors.length > 3 && authorNames.isNotEmpty) {
               authorNames.add('et al.');
             }
-            final authorStr = authorNames.isNotEmpty
-                ? authorNames.join(', ')
-                : 'Unknown Author';
 
             // Get year
             String year = 'n.d.';
@@ -3313,7 +3657,14 @@ RULES:
                 published.isNotEmpty &&
                 published[0] is List &&
                 published[0].isNotEmpty) {
-              year = published[0][0].toString();
+              int? parsedY = int.tryParse(published[0][0].toString());
+              if (parsedY != null) {
+                if (parsedY > DateTime.now().year + 1 && parsedY < 2200)
+                  parsedY -= 100;
+                if (parsedY >= 1900 && parsedY <= DateTime.now().year + 1) {
+                  year = parsedY.toString();
+                }
+              }
             }
 
             // Get venue
@@ -3333,7 +3684,22 @@ RULES:
               }
             }
 
+            String authorStr = 'Institutional Author';
+            if (authorNames.isNotEmpty) {
+              authorStr = authorNames.join(', ');
+            } else if (item['publisher'] != null) {
+              authorStr = '${item['publisher']} (Publisher)';
+            }
+
             final citation = '$authorStr ($year). $title. $venue.';
+
+            // Crossref uses 'subject' for keywords/topics
+            List<String> keywords = [];
+            final subjects = item['subject'] as List? ?? [];
+            for (var sub in subjects.take(5)) {
+              if (sub != null) keywords.add(sub.toString());
+            }
+            final keywordStr = keywords.join(', ');
 
             allPapers.add({
               'citation': citation,
@@ -3341,6 +3707,8 @@ RULES:
               'methodology': item['type']?.toString().replaceAll('-', ' ') ??
                   'Research Paper',
               'key_outcome': 'See full paper for details',
+              'keywords': keywordStr,
+              'country': '',
             });
           }
         }
@@ -3349,14 +3717,108 @@ RULES:
       } catch (e) {
         print('DEBUG: Crossref API error: $e');
       }
+    } // End Crossref block
+    } // End Academic DBs check
+
+    if (_searchGoogleScholar) {
+      try {
+        final encodedTopic = Uri.encodeComponent(topic);
+        final gsUrl = 'https://scholar.google.com/scholar?q=$encodedTopic';
+        
+        final response = await http.get(
+          Uri.parse(gsUrl),
+          headers: {
+            'User-Agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          },
+        ).timeout(const Duration(seconds: 15));
+
+        if (response.statusCode == 200) {
+          final body = response.body;
+          final blocks = body.split('<div class="gs_ri">');
+
+          // Process Google Scholar blocks (skipping the first split part since it's the header)
+          for (int i = 1; i < blocks.length; i++) {
+            final block = blocks[i];
+
+            final titleMatch = RegExp(r'<h3 class="gs_rt"[^>]*>.*?<a\s[^>]*href="([^"]*)"[^>]*>(.*?)</a>').firstMatch(block);
+            
+            String url = '';
+            String title = '';
+            if (titleMatch != null) {
+                // Decode HTML entities in URL and strip tags in title
+                url = titleMatch.group(1)?.replaceAll('&amp;', '&') ?? '';
+                title = titleMatch.group(2)?.replaceAll(RegExp(r'<[^>]*>'), '') ?? '';
+            } else {
+                 final titleMatchNoLink = RegExp(r'<h3 class="gs_rt">.*?<span\s.*?</span>(.*?)</h3>').firstMatch(block);
+                 if (titleMatchNoLink != null) {
+                     title = titleMatchNoLink.group(1)?.replaceAll(RegExp(r'<[^>]*>'), '') ?? '';
+                 }
+            }
+
+            if (title.isEmpty) continue;
+            // Check if we already have this paper
+            if (allPapers.any((p) => p['citation']?.contains(title) ?? false)) {
+              continue;
+            }
+
+            // Authors, Year, Venue
+            final infoMatch = RegExp(r'<div class="gs_a">(.*?)</div>').firstMatch(block);
+            String authorStr = 'Institutional Author';
+            String year = 'n.d.';
+            String venue = 'Google Scholar';
+            
+            if (infoMatch != null) {
+                String gsA = infoMatch.group(1)?.replaceAll(RegExp(r'<[^>]*>'), '').replaceAll('&hellip;', '...').replaceAll('&nbsp;', ' ') ?? '';
+                
+                final parts = gsA.split('-');
+                if (parts.isNotEmpty && parts[0].trim().isNotEmpty) {
+                  authorStr = parts[0].trim();
+                }
+                if (parts.length > 1) {
+                    final middle = parts[1];
+                    final yearMatch = RegExp(r'\b(19|20|21)\d{2}\b').firstMatch(middle);
+                    if (yearMatch != null) {
+                        year = yearMatch.group(0) ?? '';
+                    }
+                    if (parts.length > 2) {
+                      venue = parts[2].trim();
+                    } else if (yearMatch != null) {
+                      // Attempt to extract venue leading up to the year
+                      final v = middle.substring(0, yearMatch.start).trim();
+                      if (v.isNotEmpty && v.length > 2) venue = v;
+                    }
+                }
+            }
+
+            // Snippet (Outcome)
+            final snippetMatch = RegExp(r'<div class="gs_rs">(.*?)</div>').firstMatch(block);
+            String snippet = 'View paper on Google Scholar for details.';
+            if (snippetMatch != null) {
+                snippet = snippetMatch.group(1)?.replaceAll(RegExp(r'<[^>]*>'), '').replaceAll('&hellip;', '...').replaceAll('&nbsp;', ' ').trim() ?? '';
+                if (snippet.isEmpty) snippet = 'View paper on Google Scholar for details.';
+            }
+
+            final citation = '$authorStr ($year). $title. $venue.';
+
+            allPapers.add({
+              'citation': citation,
+              'url': url.isNotEmpty ? url : gsUrl,
+              'methodology': venue.contains('books') ? 'Book' : 'Academic Paper',
+              'key_outcome': snippet,
+            });
+          }
+          print('DEBUG: Added papers from Google Scholar, total now: ${allPapers.length}');
+        } else {
+           print('DEBUG: Google Scholar fetch failed with code: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('DEBUG: Google Scholar API/Scrape error: $e');
+      }
     }
 
-    // Sort all papers by year descending (newest first)
-    allPapers.sort((a, b) {
-      final yearA = RegExp(r'\((\d{4})\)').firstMatch(a['citation'] ?? '')?.group(1) ?? '0';
-      final yearB = RegExp(r'\((\d{4})\)').firstMatch(b['citation'] ?? '')?.group(1) ?? '0';
-      return yearB.compareTo(yearA);
-    });
+    // Note: Removed local year-based sorting to preserve the true relevance ranking
+    // returned natively by the OpenAlex and Crossref APIs.
 
     return allPapers;
   }
@@ -3370,87 +3832,112 @@ RULES:
       final doc = pw.Document();
 
       // Helper for consistent paragraph style
-      pw.TextStyle bodyStyle = const pw.TextStyle(fontSize: 11, lineSpacing: 1.5);
-      pw.TextStyle headingStyle = pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold);
-      pw.TextStyle sectionStyle = pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold);
+      pw.TextStyle bodyStyle =
+          const pw.TextStyle(fontSize: 11, lineSpacing: 1.5);
+      pw.TextStyle headingStyle =
+          pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold);
+      pw.TextStyle sectionStyle =
+          pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold);
 
       // Get actual content or meaningful defaults based on research topic
-      final String topic = _topicController.text.isNotEmpty 
-          ? _topicController.text 
+      final String topic = _topicController.text.isNotEmpty
+          ? _topicController.text
           : 'Research Topic';
       final String requirements = _requirementsController.text.isNotEmpty
           ? _requirementsController.text
           : 'specific requirements';
       final int paperCount = _relatedPapers.length;
-      
+
       // Generate meaningful content sections
-      String abstractObj = _safeString(_llmGeneratedContent['abstract_objective'],
+      String abstractObj = _safeString(
+          _llmGeneratedContent['abstract_objective'],
           '$topic is a rapidly evolving field that addresses critical challenges across multiple domains. This document provides a comprehensive analysis of the key concepts, technologies, applications, and recent advancements in $topic, drawing from current research and real-world implementations to present an authoritative overview of the field.');
-      
-      String abstractMethods = _safeString(_llmGeneratedContent['abstract_methods'],
+
+      String abstractMethods = _safeString(
+          _llmGeneratedContent['abstract_methods'],
           'This analysis examines the core technical approaches and methodologies employed in $topic, covering fundamental principles, architectural designs, and implementation strategies. The investigation spans multiple application domains, drawing from peer-reviewed research published in major databases including Scopus, IEEE Xplore, PubMed, and Web of Science, as well as real-world deployment data.');
-      
-      String abstractResults = _safeString(_llmGeneratedContent['abstract_results'],
+
+      String abstractResults = _safeString(
+          _llmGeneratedContent['abstract_results'],
           'The analysis reveals significant advancements in $topic over the past five years, with performance improvements ranging from 20% to 60% across key metrics. Multiple real-world deployments demonstrate practical viability, with adoption growing at an estimated 30% year-over-year. The evidence shows that $topic has matured from experimental concepts to production-ready solutions in several application areas.');
-      
-      String abstractConclusions = _safeString(_llmGeneratedContent['abstract_conclusions'],
+
+      String abstractConclusions = _safeString(
+          _llmGeneratedContent['abstract_conclusions'],
           '$topic represents a transformative development with substantial evidence supporting its effectiveness. While challenges remain in scalability, standardization, and cost optimization, the trajectory of progress suggests continued rapid advancement. Strategic investment in key research areas could accelerate adoption and unlock new applications.');
-      
-      String introBackground = _safeString(_llmGeneratedContent['introduction_background'],
+
+      String introBackground = _safeString(
+          _llmGeneratedContent['introduction_background'],
           '$topic has emerged as one of the most significant areas of technological and scientific development in recent years, driven by advances in computing power, data availability, and theoretical breakthroughs. The field has its roots in foundational work spanning several decades, but recent innovations have accelerated progress dramatically, enabling applications that were previously considered impractical. Today, $topic touches virtually every major industry sector, from healthcare and manufacturing to finance and environmental science, with global investment exceeding billions of dollars annually. Understanding the landscape of $topic — its core principles, key technologies, practical applications, and remaining challenges — is essential for researchers, practitioners, and decision-makers seeking to leverage its potential.');
-      
-      String introObjectives = _safeString(_llmGeneratedContent['introduction_objectives'],
+
+      String introObjectives = _safeString(
+          _llmGeneratedContent['introduction_objectives'],
           'This document aims to provide a thorough understanding of $topic by addressing the following questions: What are the fundamental concepts and principles? How do the core technologies and methods work? What has been achieved so far, and what are the proven applications? What are the current limitations and open challenges? Where is the field heading? By answering these questions with specific technical details, performance data, and real-world examples, this document serves as both an educational resource and a practical reference for anyone seeking deep knowledge of $topic.');
 
-      String overviewCoreConcepts = _safeString(_llmGeneratedContent['overview_core_concepts'],
+      String overviewCoreConcepts = _safeString(
+          _llmGeneratedContent['overview_core_concepts'],
           'At its foundation, $topic relies on several core concepts that define how the field operates. These fundamental principles establish the theoretical framework upon which all practical applications are built. Understanding these concepts is essential for grasping how different implementations achieve their results and why certain approaches are more effective than others. The interplay between these foundational elements creates the rich ecosystem of techniques and solutions that characterize the current state of $topic.');
 
-      String overviewTaxonomy = _safeString(_llmGeneratedContent['overview_taxonomy'],
+      String overviewTaxonomy = _safeString(
+          _llmGeneratedContent['overview_taxonomy'],
           'The landscape of $topic can be broadly categorized into several distinct types and approaches, each with its own strengths, limitations, and ideal use cases. These categories reflect different underlying philosophies and technical approaches to solving the core problems in the field. Understanding this taxonomy helps practitioners choose the most appropriate approach for their specific requirements and constraints.');
 
-      String overviewEvolution = _safeString(_llmGeneratedContent['overview_evolution'],
+      String overviewEvolution = _safeString(
+          _llmGeneratedContent['overview_evolution'],
           'The evolution of $topic can be traced through several distinct phases, each marked by significant conceptual or technological breakthroughs. Early work in the field laid the theoretical groundwork, while subsequent advances in enabling technologies — particularly in computing hardware, algorithmic efficiency, and data infrastructure — catalyzed waves of practical innovation. The most recent phase has been characterized by a shift from academic research to widespread commercial deployment, with major technology companies and startups alike driving rapid iteration and improvement.');
 
-      String technicalArchitecture = _safeString(_llmGeneratedContent['technical_architecture'],
+      String technicalArchitecture = _safeString(
+          _llmGeneratedContent['technical_architecture'],
           'The architecture of modern $topic implementations typically consists of multiple interconnected components, each responsible for a specific aspect of the overall system. These components work together in a pipeline or layered architecture, with data flowing from input processing through core computation to output generation. The design choices at each layer — including data representations, processing algorithms, and optimization strategies — significantly influence the overall system performance, scalability, and resource requirements.');
 
-      String technicalMechanisms = _safeString(_llmGeneratedContent['technical_mechanisms'],
+      String technicalMechanisms = _safeString(
+          _llmGeneratedContent['technical_mechanisms'],
           'The core working mechanisms of $topic involve a series of well-defined processes that transform inputs into desired outputs. At the most fundamental level, these mechanisms rely on mathematical models, algorithmic procedures, or physical processes that have been refined through extensive research and experimentation. Understanding these step-by-step processes is crucial for anyone looking to implement, optimize, or advance the state of the art in $topic. The efficiency and effectiveness of these mechanisms directly determine the practical viability of real-world applications.');
 
-      String technicalImplementation = _safeString(_llmGeneratedContent['technical_implementation'],
+      String technicalImplementation = _safeString(
+          _llmGeneratedContent['technical_implementation'],
           'Real-world implementation of $topic leverages a variety of tools, platforms, and infrastructure components. The choice of implementation stack depends on factors including scale requirements, latency constraints, cost considerations, and the specific application domain. Modern implementations increasingly rely on cloud computing platforms, specialized hardware accelerators, and open-source software frameworks that have significantly lowered the barrier to entry while improving performance.');
 
-      String resultsPerformance = _safeString(_llmGeneratedContent['results_performance'],
+      String resultsPerformance = _safeString(
+          _llmGeneratedContent['results_performance'],
           'Performance benchmarks across various implementations of $topic demonstrate significant improvements over baseline approaches. State-of-the-art systems have achieved accuracy levels exceeding 90% in many standard evaluation tasks, with processing speeds that enable real-time applications. Energy efficiency and computational cost have also improved substantially, making $topic more accessible and sustainable for widespread deployment. Head-to-head comparisons between different approaches reveal clear trade-offs between accuracy, speed, and resource consumption.');
 
-      String resultsCaseStudies = _safeString(_llmGeneratedContent['results_case_studies'],
+      String resultsCaseStudies = _safeString(
+          _llmGeneratedContent['results_case_studies'],
           'Several notable real-world deployments illustrate the practical impact of $topic. Major technology companies and research institutions have demonstrated successful implementations across diverse domains, with measurable improvements in efficiency, accuracy, and cost-effectiveness. These case studies provide concrete evidence of the technology\'s maturity and highlight both the benefits achieved and the practical challenges encountered during deployment at scale.');
 
-      String resultsComparison = _safeString(_llmGeneratedContent['results_comparison'],
+      String resultsComparison = _safeString(
+          _llmGeneratedContent['results_comparison'],
           'A comparative analysis of the major approaches within $topic reveals distinct advantages and disadvantages for each. Traditional methods tend to offer greater interpretability and consistency but may lag in peak performance. Newer approaches often achieve superior results on standard benchmarks but may require significantly more computational resources or training data. Hybrid methods that combine elements of multiple approaches have shown promise in achieving a better balance across multiple evaluation criteria.');
 
-      String resultsKeyFindings = _safeString(_llmGeneratedContent['results_key_findings'],
-          _findings.isNotEmpty && !_findings.contains('Fetching real academic papers') && _findings != 'No findings provided.'
-          ? _findings
-          : 'The most significant findings reveal that $topic has made substantial progress in recent years. Key breakthroughs include improvements in core performance metrics, with gains ranging from 15% to 45% compared to previous generation approaches. Several critical success factors have been identified, including data quality, architectural choices, and optimization strategies. The evidence consistently demonstrates that careful attention to system design and domain-specific tuning are essential for achieving optimal real-world outcomes.');
+      String resultsKeyFindings = _safeString(
+          _llmGeneratedContent['results_key_findings'],
+          _findings.isNotEmpty &&
+                  !_findings.contains('Fetching real academic papers') &&
+                  _findings != 'No findings provided.'
+              ? _findings
+              : 'The most significant findings reveal that $topic has made substantial progress in recent years. Key breakthroughs include improvements in core performance metrics, with gains ranging from 15% to 45% compared to previous generation approaches. Several critical success factors have been identified, including data quality, architectural choices, and optimization strategies. The evidence consistently demonstrates that careful attention to system design and domain-specific tuning are essential for achieving optimal real-world outcomes.');
 
-      String resultsSynthesis = _summary.isNotEmpty && 
-          _summary != 'Your generated summary will appear here...' &&
-          !_summary.startsWith('Generating comprehensive research document')
+      String resultsSynthesis = _summary.isNotEmpty &&
+              _summary != 'Your generated summary will appear here...' &&
+              !_summary.startsWith('Generating comprehensive research document')
           ? _summary
           : _safeString(_llmGeneratedContent['results_synthesis'],
               'Taking all evidence together, $topic has demonstrated clear viability across multiple application domains. The technology has progressed from early-stage research to production-grade implementations, with proven performance in controlled evaluations and real-world deployments alike. Key trends include increasing automation, improved efficiency, and broader accessibility. Despite this progress, important challenges remain in areas such as scalability, robustness, and standardization that must be addressed for the field to reach its full potential.');
-      
-      String discussionSummary = _safeString(_llmGeneratedContent['discussion_summary'],
+
+      String discussionSummary = _safeString(
+          _llmGeneratedContent['discussion_summary'],
           'The collective evidence on $topic paints a picture of a field that has achieved remarkable progress while still facing meaningful challenges. Core technologies have matured significantly, with performance levels that meet or exceed requirements for many practical applications. At the same time, the gap between controlled research settings and messy real-world conditions remains a persistent theme, underscoring the need for continued work on robustness, adaptability, and domain-specific optimization.');
-      
-      String discussionImplications = _safeString(_llmGeneratedContent['discussion_implications'],
+
+      String discussionImplications = _safeString(
+          _llmGeneratedContent['discussion_implications'],
           'The practical implications of advances in $topic are far-reaching. For industry practitioners, the current state of technology enables immediate deployment in many domains with measurable returns on investment. For policymakers, the rapid pace of development necessitates proactive engagement with regulatory frameworks and ethical considerations. For researchers, numerous open problems and promising directions offer rich opportunities for high-impact contributions. The continued convergence of technical capability and practical demand suggests that $topic will play an increasingly central role in technology strategy across sectors.');
-      
-      String discussionChallenges = _safeString(_llmGeneratedContent['discussion_challenges'],
+
+      String discussionChallenges = _safeString(
+          _llmGeneratedContent['discussion_challenges'],
           'Despite significant progress, $topic faces several important challenges that must be addressed. Technical challenges include improving scalability to handle larger and more complex problems, enhancing robustness against edge cases and adversarial conditions, and reducing computational costs to enable broader accessibility. Practical challenges include the difficulty of integrating new techniques into existing workflows and systems, the shortage of skilled practitioners, and the need for better tools and methodologies for evaluation and validation. Societal challenges encompass ethical concerns, fairness and bias considerations, data privacy requirements, and the need for transparency and explainability in high-stakes applications.');
 
-      String discussionFuture = _safeString(_llmGeneratedContent['discussion_future'],
+      String discussionFuture = _safeString(
+          _llmGeneratedContent['discussion_future'],
           'Looking ahead, several promising directions are poised to shape the future of $topic. Emerging research suggests potential breakthroughs in efficiency, enabling more powerful capabilities with fewer resources. Cross-disciplinary integration — combining $topic with advances in related fields — is opening new application frontiers. The development of better evaluation frameworks and standardized benchmarks will strengthen the foundation for future progress. As the field matures, the focus is expected to shift increasingly from pure performance optimization toward reliability, efficiency, accessibility, and responsible deployment.');
 
       String conclusions = _safeString(_llmGeneratedContent['conclusions'],
@@ -3458,14 +3945,16 @@ RULES:
 
       doc.addPage(pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.only(left: 72, right: 72, top: 72, bottom: 72),
+        margin:
+            const pw.EdgeInsets.only(left: 72, right: 72, top: 72, bottom: 72),
         header: (pw.Context context) {
           if (context.pageNumber == 1) return pw.Container();
           return pw.Container(
             alignment: pw.Alignment.centerRight,
             margin: const pw.EdgeInsets.only(bottom: 8),
             child: pw.Text(
-              _sanitizeForPdf(topic.length > 50 ? topic.substring(0, 50) + '...' : topic),
+              _sanitizeForPdf(
+                  topic.length > 50 ? topic.substring(0, 50) + '...' : topic),
               style: const pw.TextStyle(fontSize: 9),
             ),
           );
@@ -3505,7 +3994,7 @@ RULES:
             textAlign: pw.TextAlign.center,
           ),
           pw.SizedBox(height: 60),
-          
+
           // ABSTRACT
           pw.Container(
             padding: const pw.EdgeInsets.all(16),
@@ -3515,103 +4004,144 @@ RULES:
             child: pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                pw.Text('ABSTRACT', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+                pw.Text('ABSTRACT',
+                    style: pw.TextStyle(
+                        fontSize: 12, fontWeight: pw.FontWeight.bold)),
                 pw.SizedBox(height: 12),
                 pw.RichText(
                   text: pw.TextSpan(
                     children: [
-                      pw.TextSpan(text: 'Overview: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
-                      pw.TextSpan(text: _sanitizeForPdf(abstractObj) + ' ', style: const pw.TextStyle(fontSize: 10)),
-                      pw.TextSpan(text: 'Approaches: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
-                      pw.TextSpan(text: _sanitizeForPdf(abstractMethods) + ' ', style: const pw.TextStyle(fontSize: 10)),
-                      pw.TextSpan(text: 'Key Results: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
-                      pw.TextSpan(text: _sanitizeForPdf(abstractResults) + ' ', style: const pw.TextStyle(fontSize: 10)),
-                      pw.TextSpan(text: 'Conclusions: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10)),
-                      pw.TextSpan(text: _sanitizeForPdf(abstractConclusions), style: const pw.TextStyle(fontSize: 10)),
+                      pw.TextSpan(
+                          text: 'Overview: ',
+                          style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                      pw.TextSpan(
+                          text: _sanitizeForPdf(abstractObj) + ' ',
+                          style: const pw.TextStyle(fontSize: 10)),
+                      pw.TextSpan(
+                          text: 'Approaches: ',
+                          style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                      pw.TextSpan(
+                          text: _sanitizeForPdf(abstractMethods) + ' ',
+                          style: const pw.TextStyle(fontSize: 10)),
+                      pw.TextSpan(
+                          text: 'Key Results: ',
+                          style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                      pw.TextSpan(
+                          text: _sanitizeForPdf(abstractResults) + ' ',
+                          style: const pw.TextStyle(fontSize: 10)),
+                      pw.TextSpan(
+                          text: 'Conclusions: ',
+                          style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                      pw.TextSpan(
+                          text: _sanitizeForPdf(abstractConclusions),
+                          style: const pw.TextStyle(fontSize: 10)),
                     ],
                   ),
                   textAlign: pw.TextAlign.justify,
                 ),
                 pw.SizedBox(height: 8),
-                pw.Text('Keywords: ${_sanitizeForPdf(topic)}, research analysis, technology overview, state of the art',
-                    style: pw.TextStyle(fontSize: 10, fontStyle: pw.FontStyle.italic)),
+                pw.Text(
+                    'Keywords: ${_sanitizeForPdf(topic)}, research analysis, technology overview, state of the art',
+                    style: pw.TextStyle(
+                        fontSize: 10, fontStyle: pw.FontStyle.italic)),
               ],
             ),
           ),
           pw.SizedBox(height: 24),
-          
+
           // 1. INTRODUCTION
           pw.Text('1. INTRODUCTION', style: sectionStyle),
           pw.SizedBox(height: 12),
           pw.Text('1.1 Background and Context', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(introBackground), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(introBackground),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
           pw.Text('1.2 Scope and Objectives', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(introObjectives), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(introObjectives),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 20),
-          
+
           // 2. CONCEPTUAL OVERVIEW
           pw.Text('2. CONCEPTUAL OVERVIEW', style: sectionStyle),
           pw.SizedBox(height: 12),
           pw.Text('2.1 Core Concepts and Principles', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(overviewCoreConcepts), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(overviewCoreConcepts),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
           pw.Text('2.2 Classification and Taxonomy', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(overviewTaxonomy), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(overviewTaxonomy),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
           pw.Text('2.3 Historical Evolution', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(overviewEvolution), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(overviewEvolution),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 20),
-          
+
           // 3. TECHNICAL ANALYSIS
           pw.Text('3. TECHNICAL ANALYSIS', style: sectionStyle),
           pw.SizedBox(height: 12),
           pw.Text('3.1 Architecture and Design', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(technicalArchitecture), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(technicalArchitecture),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
           pw.Text('3.2 Working Mechanisms', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(technicalMechanisms), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(technicalMechanisms),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
           pw.Text('3.3 Implementation Details', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(technicalImplementation), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(technicalImplementation),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 20),
-          
+
           // 4. FINDINGS AND RESULTS
           pw.Text('4. FINDINGS AND RESULTS', style: sectionStyle),
           pw.SizedBox(height: 12),
           pw.Text('4.1 Performance Analysis', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(resultsPerformance), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(resultsPerformance),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
-          pw.Text('4.2 Real-World Applications and Case Studies', style: headingStyle),
+          pw.Text('4.2 Real-World Applications and Case Studies',
+              style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(resultsCaseStudies), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(resultsCaseStudies),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
           pw.Text('4.3 Comparative Analysis', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(resultsComparison), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(resultsComparison),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
           pw.Text('4.4 Key Findings', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(resultsKeyFindings), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(resultsKeyFindings),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
           pw.Text('4.5 Summary of Evidence', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(resultsSynthesis), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(resultsSynthesis),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 16),
-          
+
           // TABLE 1: Related Research
           if (_paperDetails.isNotEmpty) ...[
             pw.Text('Table 1. Related Research Overview',
-                style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, fontStyle: pw.FontStyle.italic)),
+                style: pw.TextStyle(
+                    fontSize: 10,
+                    fontWeight: pw.FontWeight.bold,
+                    fontStyle: pw.FontStyle.italic)),
             pw.SizedBox(height: 8),
             pw.Table(
               border: pw.TableBorder.all(width: 0.5),
@@ -3626,27 +4156,45 @@ RULES:
                   children: [
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(6),
-                      child: pw.Text('Study', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                      child: pw.Text('Study',
+                          style: pw.TextStyle(
+                              fontSize: 9, fontWeight: pw.FontWeight.bold)),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(6),
-                      child: pw.Text('Type', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                      child: pw.Text('Type',
+                          style: pw.TextStyle(
+                              fontSize: 9, fontWeight: pw.FontWeight.bold)),
                     ),
                     pw.Padding(
                       padding: const pw.EdgeInsets.all(6),
-                      child: pw.Text('Key Contribution', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
+                      child: pw.Text('Key Contribution',
+                          style: pw.TextStyle(
+                              fontSize: 9, fontWeight: pw.FontWeight.bold)),
                     ),
                   ],
                 ),
                 ..._paperDetails.take(tableLimitLocal).map((paperData) {
-                  final study = _sanitizeForPdf(_extractPaperTitle(_safeString(paperData['citation'], 'Study')));
-                  final method = _sanitizeForPdf(_safeString(paperData['methodology'], 'Research'));
-                  final findings = _sanitizeForPdf(_safeString(paperData['key_outcome'], 'See details'));
+                  final study = _sanitizeForPdf(_extractPaperTitle(
+                      _safeString(paperData['citation'], 'Study')));
+                  final method = _sanitizeForPdf(
+                      _safeString(paperData['methodology'], 'Research'));
+                  final findings = _sanitizeForPdf(
+                      _safeString(paperData['key_outcome'], 'See details'));
                   return pw.TableRow(
                     children: [
-                      pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text(study, style: const pw.TextStyle(fontSize: 8))),
-                      pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text(method, style: const pw.TextStyle(fontSize: 8))),
-                      pw.Padding(padding: const pw.EdgeInsets.all(6), child: pw.Text(findings, style: const pw.TextStyle(fontSize: 8))),
+                      pw.Padding(
+                          padding: const pw.EdgeInsets.all(6),
+                          child: pw.Text(study,
+                              style: const pw.TextStyle(fontSize: 8))),
+                      pw.Padding(
+                          padding: const pw.EdgeInsets.all(6),
+                          child: pw.Text(method,
+                              style: const pw.TextStyle(fontSize: 8))),
+                      pw.Padding(
+                          padding: const pw.EdgeInsets.all(6),
+                          child: pw.Text(findings,
+                              style: const pw.TextStyle(fontSize: 8))),
                     ],
                   );
                 }).toList(),
@@ -3655,50 +4203,64 @@ RULES:
             pw.SizedBox(height: 16),
           ],
           pw.SizedBox(height: 20),
-          
+
           // 5. DISCUSSION
           pw.Text('5. DISCUSSION', style: sectionStyle),
           pw.SizedBox(height: 12),
           pw.Text('5.1 Overall Assessment', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(discussionSummary), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(discussionSummary),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
           pw.Text('5.2 Practical Implications', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(discussionImplications), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(discussionImplications),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
-          pw.Text('5.3 Current Challenges and Limitations', style: headingStyle),
+          pw.Text('5.3 Current Challenges and Limitations',
+              style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(discussionChallenges), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(discussionChallenges),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 12),
           pw.Text('5.4 Future Directions', style: headingStyle),
           pw.SizedBox(height: 6),
-          pw.Text(_sanitizeForPdf(discussionFuture), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(discussionFuture),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 20),
-          
+
           // 6. CONCLUSION
           pw.Text('6. CONCLUSION', style: sectionStyle),
           pw.SizedBox(height: 12),
-          pw.Text(_sanitizeForPdf(conclusions), style: bodyStyle, textAlign: pw.TextAlign.justify),
+          pw.Text(_sanitizeForPdf(conclusions),
+              style: bodyStyle, textAlign: pw.TextAlign.justify),
           pw.SizedBox(height: 24),
-          
+
           // REFERENCES
           pw.Text('REFERENCES', style: sectionStyle),
           pw.SizedBox(height: 12),
           if (_relatedPapers.isNotEmpty)
-            ..._relatedPapers.take(refLimitLocal).toList().asMap().entries.map((entry) =>
-              pw.Padding(
-                padding: const pw.EdgeInsets.only(bottom: 8),
-                child: pw.Text(
-                  '[${entry.key + 1}] ${_sanitizeForPdf(entry.value)}',
-                  style: const pw.TextStyle(fontSize: 10),
-                  textAlign: pw.TextAlign.justify,
-                ),
-              ),
-            ).toList()
+            ..._relatedPapers
+                .take(refLimitLocal)
+                .toList()
+                .asMap()
+                .entries
+                .map(
+                  (entry) => pw.Padding(
+                    padding: const pw.EdgeInsets.only(bottom: 8),
+                    child: pw.Text(
+                      '[${entry.key + 1}] ${_sanitizeForPdf(entry.value)}',
+                      style: const pw.TextStyle(fontSize: 10),
+                      textAlign: pw.TextAlign.justify,
+                    ),
+                  ),
+                )
+                .toList()
           else
-            pw.Text('No references available.', style: pw.TextStyle(fontSize: 10, fontStyle: pw.FontStyle.italic)),
-          
+            pw.Text('No references available.',
+                style:
+                    pw.TextStyle(fontSize: 10, fontStyle: pw.FontStyle.italic)),
+
           pw.SizedBox(height: 24),
         ],
       ));
@@ -3712,7 +4274,7 @@ RULES:
       final String? outputFile = await FilePicker.platform.saveFile(
           dialogTitle: 'Save Research Document',
           fileName:
-              'Research_${_topicController.text.replaceAll(' ', '_')}.pdf');
+              'Research_${_topicController.text.replaceAll(' ', '_').replaceAll(RegExp(r'[\\/:*?"<>|]'), '')}.pdf');
       if (outputFile != null) {
         final file = File(outputFile);
         try {
@@ -3739,7 +4301,7 @@ RULES:
       final String? outputFile = await FilePicker.platform.saveFile(
           dialogTitle: 'Save Research Document (Compact)',
           fileName:
-              'Research_${_topicController.text.replaceAll(' ', '_')}_compact.pdf');
+              'Research_${_topicController.text.replaceAll(' ', '_').replaceAll(RegExp(r'[\\/:*?"<>|]'), '')}_compact.pdf');
       if (outputFile != null) {
         final file = File(outputFile);
         await file.writeAsBytes(await doc.save());
@@ -3894,9 +4456,7 @@ RULES:
                     decoration: BoxDecoration(
                       color: AppTheme.surfaceHover,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                          color: AppTheme.border,
-                          width: 1),
+                      border: Border.all(color: AppTheme.border, width: 1),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.03),
@@ -3973,15 +4533,13 @@ RULES:
                             color: AppTheme.textSecondary),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                              color: AppTheme.border,
-                              width: 1),
+                          borderSide:
+                              BorderSide(color: AppTheme.border, width: 1),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(
-                              color: AppTheme.border,
-                              width: 1),
+                          borderSide:
+                              BorderSide(color: AppTheme.border, width: 1),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -4037,9 +4595,7 @@ RULES:
                     decoration: BoxDecoration(
                       color: AppTheme.surfaceHover,
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                          color: AppTheme.border,
-                          width: 1),
+                      border: Border.all(color: AppTheme.border, width: 1),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.15),

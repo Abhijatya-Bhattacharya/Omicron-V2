@@ -91,7 +91,13 @@ class ResearchPaper {
 
     final yearMatch = RegExp(r'\((\d{4})\)').firstMatch(citation);
     if (yearMatch != null) {
-      year = int.tryParse(yearMatch.group(1) ?? '');
+      int? parsed = int.tryParse(yearMatch.group(1) ?? '');
+      if (parsed != null) {
+        if (parsed > DateTime.now().year + 1 && parsed < 2200) parsed -= 100;
+        if (parsed >= 1900 && parsed <= DateTime.now().year + 1) {
+          year = parsed;
+        }
+      }
       authors = citation.substring(0, yearMatch.start).trim();
       if (authors.endsWith(',')) authors = authors.substring(0, authors.length - 1).trim();
       final afterYear = citation.substring(yearMatch.end).trim();
@@ -102,6 +108,17 @@ class ResearchPaper {
       }
     } else {
       title = citation;
+      // Fallback: try to find a bare year (1900–2099) without parentheses
+      final bareYearMatch = RegExp(r'\b((?:19|20|21)\d{2})\b').firstMatch(citation);
+      if (bareYearMatch != null) {
+        int? parsed = int.tryParse(bareYearMatch.group(0) ?? '');
+        if (parsed != null) {
+          if (parsed > DateTime.now().year + 1 && parsed < 2200) parsed -= 100;
+          if (parsed >= 1900 && parsed <= DateTime.now().year + 1) {
+            year = parsed;
+          }
+        }
+      }
     }
 
     return ResearchPaper(

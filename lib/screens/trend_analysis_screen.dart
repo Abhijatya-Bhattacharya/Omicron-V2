@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -10,8 +12,9 @@ import '../models/research_paper.dart';
 class TrendAnalysisScreen extends StatefulWidget {
   final List<ResearchPaper> papers;
   final Map<String, dynamic>? llmTrendInsights;
+  final ValueChanged<List<ResearchPaper>>? onPapersChanged;
 
-  const TrendAnalysisScreen({super.key, required this.papers, this.llmTrendInsights});
+  const TrendAnalysisScreen({super.key, required this.papers, this.llmTrendInsights, this.onPapersChanged});
 
   @override
   State<TrendAnalysisScreen> createState() => _TrendAnalysisScreenState();
@@ -21,6 +24,50 @@ class _TrendAnalysisScreenState extends State<TrendAnalysisScreen> {
   String? _selectedTopic; // null = all topics
   final Set<String> _collapsedTrendTopics = {}; // tracks collapsed topic groups
   bool _initialTrendCollapseDone = false;
+
+  Future<void> _exportCsv() async {
+    try {
+      final String? outputFile = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save Trend Analysis CSV',
+          fileName: 'Trend_Analysis.csv',
+          allowedExtensions: ['csv'],
+          type: FileType.custom,
+      );
+      if (outputFile != null) {
+        final buffer = StringBuffer();
+        buffer.writeln('Title,Authors,Year,Venue,Topic,Methodology,Keywords,PRISMA Stage');
+        for (final p in widget.papers) {
+          final title = '"${p.title.replaceAll('"', '""')}"';
+          final authors = '"${p.authors.replaceAll('"', '""')}"';
+          final venue = '"${p.source?.replaceAll('"', '""') ?? ''}"';
+          final topic = '"${p.topic?.replaceAll('"', '""') ?? ''}"';
+          final methodology = '"${p.methodology.replaceAll('"', '""')}"';
+          final keywords = '"${p.keywords.join(";").replaceAll('"', '""')}"';
+          final stage = '"${p.prismaStage.toString().split('.').last}"';
+
+          buffer.writeln('$title,$authors,${p.year ?? ""},$venue,$topic,$methodology,$keywords,$stage');
+        }
+        
+        // Write file
+        final file = File(outputFile);
+        await file.writeAsString(buffer.toString());
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('CSV saved successfully to $outputFile'),
+              backgroundColor: AppTheme.success,
+              duration: const Duration(seconds: 3)));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Failed to save CSV: $e'),
+            backgroundColor: AppTheme.error,
+            duration: const Duration(seconds: 3)));
+      }
+    }
+  }
 
   List<String> get _allTopics {
     final topics = <String>{};
@@ -75,15 +122,65 @@ class _TrendAnalysisScreenState extends State<TrendAnalysisScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                Column(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Trend Analysis', style: AppTheme.displayMedium()),
-                    const SizedBox(height: 4),
-                    Text(
-                        'Auto-generated graphs from collected research papers',
-                        style: GoogleFonts.interTight(
-                            fontSize: 14, color: AppTheme.textSecondary)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Trend Analysis', style: AppTheme.displayMedium()),
+                          const SizedBox(height: 4),
+                          Text(
+                              'Auto-generated graphs from collected research papers',
+                              style: GoogleFonts.interTight(
+                                  fontSize: 14, color: AppTheme.textSecondary)),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        if (widget.onPapersChanged != null && papers.isNotEmpty) ...[
+                          ElevatedButton.icon(
+                            onPressed: () => widget.onPapersChanged!([]),
+                            icon: const Icon(Icons.delete_sweep_rounded, size: 18),
+                            label: Text('Clear All',
+                                style: GoogleFonts.interTight(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.error.withOpacity(0.1),
+                              foregroundColor: AppTheme.error,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(color: AppTheme.error.withOpacity(0.3))),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                        ],
+                        ElevatedButton.icon(
+                          onPressed: _exportCsv,
+                          icon: const Icon(Icons.download_rounded, size: 18),
+                          label: Text('Export CSV',
+                              style: GoogleFonts.interTight(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 14),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -563,123 +660,93 @@ class _TrendAnalysisScreenState extends State<TrendAnalysisScreen> {
 
   // --- Publications per Year ---
   Widget _buildPublicationsPerYear(List<ResearchPaper> papers) {
-    final yearCounts = <int, int>{};
-    for (final p in papers) {
-      if (p.year != null) {
-        yearCounts[p.year!] = (yearCounts[p.year!] ?? 0) + 1;
-      }
+  final currentYear = DateTime.now().year;
+  final startYear = currentYear - 9;
+
+  final yearCounts = <int, int>{};
+
+  // Initialize last 10 years with 0
+  for (int y = startYear; y <= currentYear; y++) {
+    yearCounts[y] = 0;
+  }
+
+  // Count papers only in last 10 years
+  for (final p in papers) {
+    if (p.year != null &&
+        p.year! >= startYear &&
+        p.year! <= currentYear) {
+      yearCounts[p.year!] = (yearCounts[p.year!] ?? 0) + 1;
     }
+  }
 
-    if (yearCounts.isEmpty) {
-      return _chartCard('Publications per Year', _noDataWidget());
-    }
+  final sortedYears = yearCounts.keys.toList()..sort();
+  final maxCount =
+      yearCounts.values.reduce((a, b) => a > b ? a : b).toDouble();
 
-    final sortedYears = yearCounts.keys.toList()..sort();
-    final maxCount =
-        yearCounts.values.reduce((a, b) => a > b ? a : b).toDouble();
+  return _chartCard(
+    'Publications (Last 10 Years)',
+    SizedBox(
+      height: 280,
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          maxY: maxCount + 2,
+          barGroups: List.generate(sortedYears.length, (i) {
+            final year = sortedYears[i];
 
-    return _chartCard(
-      'Publications per Year',
-      SizedBox(
-        height: 280,
-        child: BarChart(
-          BarChartData(
-            alignment: BarChartAlignment.spaceAround,
-            maxY: maxCount + 2,
-            barTouchData: BarTouchData(
-              touchTooltipData: BarTouchTooltipData(
-                tooltipRoundedRadius: 8,
-                getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                  final year = sortedYears[group.x.toInt()];
-                  return BarTooltipItem(
-                    '$year\n${rod.toY.toInt()} papers',
-                    GoogleFonts.interTight(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12),
+            return BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
+                  toY: yearCounts[year]!.toDouble(),
+                  color: AppTheme.primary,
+                  width: 18,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(4)),
+                ),
+              ],
+            );
+          }),
+
+          titlesData: FlTitlesData(
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  final idx = value.toInt();
+                  if (idx < 0 || idx >= sortedYears.length) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      '${sortedYears[idx]}',
+                      style: GoogleFonts.interTight(
+                        fontSize: 10,
+                        color: AppTheme.textTertiary,
+                      ),
+                    ),
                   );
                 },
               ),
             ),
-            titlesData: FlTitlesData(
-              show: true,
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  getTitlesWidget: (value, meta) {
-                    final idx = value.toInt();
-                    if (idx < 0 || idx >= sortedYears.length) {
-                      return const SizedBox.shrink();
-                    }
-                    // Show every Nth label to avoid clutter
-                    final step = (sortedYears.length / 8).ceil().clamp(1, 5);
-                    if (idx % step != 0 && idx != sortedYears.length - 1) {
-                      return const SizedBox.shrink();
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 6),
-                      child: Text('${sortedYears[idx]}',
-                          style: GoogleFonts.interTight(
-                              fontSize: 10, color: AppTheme.textTertiary)),
-                    );
-                  },
-                  reservedSize: 28,
-                ),
-              ),
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 32,
-                  getTitlesWidget: (value, meta) {
-                    if (value == value.roundToDouble() && value >= 0) {
-                      return Text('${value.toInt()}',
-                          style: GoogleFonts.interTight(
-                              fontSize: 10, color: AppTheme.textTertiary));
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ),
-              topTitles:
-                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-              rightTitles:
-                  const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: true),
             ),
-            gridData: FlGridData(
-              show: true,
-              drawVerticalLine: false,
-              horizontalInterval: max(1, (maxCount / 5).ceilToDouble()),
-              getDrawingHorizontalLine: (value) => FlLine(
-                color: AppTheme.border,
-                strokeWidth: 0.8,
-              ),
-            ),
-            borderData: FlBorderData(show: false),
-            barGroups: List.generate(sortedYears.length, (i) {
-              final year = sortedYears[i];
-              return BarChartGroupData(
-                x: i,
-                barRods: [
-                  BarChartRodData(
-                    toY: yearCounts[year]!.toDouble(),
-                    color: AppTheme.primary,
-                    width: max(6, min(24, 300 / sortedYears.length)),
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(4)),
-                    backDrawRodData: BackgroundBarChartRodData(
-                      show: true,
-                      toY: maxCount + 2,
-                      color: AppTheme.primary.withOpacity(0.04),
-                    ),
-                  ),
-                ],
-              );
-            }),
+            topTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+            rightTitles:
+                const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
+
+          gridData: FlGridData(show: true),
+          borderData: FlBorderData(show: false),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   // --- Most Used Algorithms / Methods ---
   Widget _buildMethodologyChart(List<ResearchPaper> papers) {
